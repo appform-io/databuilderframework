@@ -291,11 +291,8 @@ response = executor.run(instance, userDetails, cart, payment);
 //Done
 ```
 
-That's it. The libary is extensively tested and documented. Go through the JavaDocs, there are a lot of details present on the same.
+That's it. The library is extensively tested and documented. Go through the JavaDocs, there are a lot of details present on the same.
 
-Version
-----
-0.5.3
 
 # Contribution, Bugs and Feedback
 For bugs, questions and discussions please use the [Github Issues](https://github.com/appform-io/databuilderframework/issues)
