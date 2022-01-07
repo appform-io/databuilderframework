@@ -1,20 +1,25 @@
 package io.appform.databuilderframework.cmplxscenariotest.data;
 
 import io.appform.databuilderframework.model.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Value;
 
-public class DataA extends Data{
+@Value
+@EqualsAndHashCode(callSuper = true)
+public class DataA extends Data {
 
-	public final int val;
-	public DataA() {
-		super("A");
-		this.val = (int) (Math.random()*10);
-		
-	}
-	
-	public DataA(int val) {
-		super("A");
-		this.val = val;
-		
-	}
+    public int val;
+
+    public DataA() {
+        super("A");
+        this.val = (int) (Math.random() * 10);
+
+    }
+
+    public DataA(int val) {
+        super("A");
+        this.val = val;
+
+    }
 
 }

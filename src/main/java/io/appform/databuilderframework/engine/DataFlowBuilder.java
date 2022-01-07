@@ -25,10 +25,11 @@ import java.util.stream.Collectors;
  *
  * <br>An object of this type should not be re-used.
  */
+@SuppressWarnings("unused")
 public class DataFlowBuilder {
     private DataBuilderMetadataManager dataBuilderMetadataManager = new DataBuilderMetadataManager();
-    private DataFlow dataFlow = new DataFlow();
-    private MixedDataBuilderFactory dataBuilderFactory = new MixedDataBuilderFactory();
+    private final DataFlow dataFlow = new DataFlow();
+    private final MixedDataBuilderFactory dataBuilderFactory = new MixedDataBuilderFactory();
 
     public DataFlowBuilder() {
         dataFlow.setTransients(Sets.newHashSet());
@@ -37,7 +38,7 @@ public class DataFlowBuilder {
     /**
      * Set name for the data flow. This is optional but recommended.
      * @param name Name for the dataflow
-     * @return
+     * @return this builder
      */
     public DataFlowBuilder withName(final String name) {
         this.dataFlow.setName(name);
@@ -45,8 +46,8 @@ public class DataFlowBuilder {
     }
     /**
      * Register your own metadata manager. This comes in handy if you want to manage DataBuilder metadata yourself.
-     * @param dataBuilderMetadataManager
-     * @return
+     * @param dataBuilderMetadataManager Meta manager to use
+     * @return this builder
      */
     public DataFlowBuilder withMetaDataManager(DataBuilderMetadataManager dataBuilderMetadataManager) {
         this.dataBuilderMetadataManager = dataBuilderMetadataManager;
@@ -58,8 +59,8 @@ public class DataFlowBuilder {
      * @param produces Name of the data that this builder produces.
      * @param consumes Names of the data that this class consumes.
      * @param dataBuilder Builder class to be used. Class must have a no-args constructor.
-     * @return
-     * @throws DataBuilderFrameworkException
+     * @return this builder
+     * @throws DataBuilderFrameworkException if builder could not be instantiated
      */
     public DataFlowBuilder withDataBuilder(String produces,
                                            Set<String> consumes,
@@ -72,8 +73,8 @@ public class DataFlowBuilder {
      * @param produces Name of the data that this builder produces.
      * @param consumes Names of the data that this class consumes.
      * @param dataBuilder Builder class to be used. Class must have a no-args constructor.
-     * @return
-     * @throws DataBuilderFrameworkException
+     * @return this builder
+     * @throws DataBuilderFrameworkException if builder could not be instantiated
      */
     public DataFlowBuilder withDataBuilder(String name,
                                            String produces,
@@ -88,8 +89,8 @@ public class DataFlowBuilder {
      * @param consumes Names of the data that this class consumes.
      * @param dataBuilder Builder class to be used. Class must have a no-args constructor.
      * @param isTransient Data produced by this class is transient and will not be a part of the data-set.
-     * @return
-     * @throws DataBuilderFrameworkException
+     * @return this builder
+     * @throws DataBuilderFrameworkException if builder could not be instantiated
      */
     public DataFlowBuilder withDataBuilder(String name,
                                            String produces,
@@ -105,8 +106,8 @@ public class DataFlowBuilder {
 
     /**
      * Register a builder class annotated with either {@link io.appform.databuilderframework.annotations.DataBuilderInfo} or {@link io.appform.databuilderframework.annotations.DataBuilderClassInfo}
-     * @return
-     * @throws DataBuilderFrameworkException
+     * @return this builder
+     * @throws DataBuilderFrameworkException if builder could not be instantiated
      */
 
     public DataFlowBuilder withAnnotatedDataBuilder(Class<? extends DataBuilder> annotatedDataBuilder) throws DataBuilderFrameworkException {
@@ -119,8 +120,8 @@ public class DataFlowBuilder {
      * @param produces Name of the data that this builder produces.
      * @param consumes Names of the data that this builder consumes.
      * @param dataBuilder Builder class to be used.
-     * @return
-     * @throws DataBuilderFrameworkException
+     * @return this builder
+     * @throws DataBuilderFrameworkException if builder could not be instantiated
      */
     public DataFlowBuilder withDataBuilder(String produces,
                                            Set<String> consumes,
@@ -133,8 +134,8 @@ public class DataFlowBuilder {
      * @param produces Name of the data that this builder produces.
      * @param consumes Names of the data that this builder consumes.
      * @param dataBuilder Builder class to be used.
-     * @return
-     * @throws DataBuilderFrameworkException
+     * @return this builder
+     * @throws DataBuilderFrameworkException if builder could not be instantiated
      */
     public DataFlowBuilder withDataBuilder(String name,
                                            String produces,
@@ -149,8 +150,8 @@ public class DataFlowBuilder {
      * @param consumes Names of the data that this builder consumes.
      * @param dataBuilder Builder class to be used.
      * @param isTransient Data produced by this class is transient and will not be a part of the data-set.
-     * @return
-     * @throws DataBuilderFrameworkException
+     * @return this builder
+     * @throws DataBuilderFrameworkException if builder could not be instantiated
      */
     public DataFlowBuilder withDataBuilder(String name,
                                            String produces,
@@ -170,8 +171,8 @@ public class DataFlowBuilder {
      * Regsiter an instance of a builder annotated with either {@link io.appform.databuilderframework.annotations.DataBuilderInfo}
      * or {@link io.appform.databuilderframework.annotations.DataBuilderClassInfo}
      * @param dataBuilder Builder instance
-     * @return
-     * @throws DataBuilderFrameworkException
+     * @return this builder
+     * @throws DataBuilderFrameworkException if builder could not be instantiated
      */
     public DataFlowBuilder withDataBuilder(DataBuilder dataBuilder) throws DataBuilderFrameworkException {
         Preconditions.checkNotNull(dataBuilder, "Null DataBuilder cannot be registered");
@@ -186,7 +187,7 @@ public class DataFlowBuilder {
     /**
      * The data to be generated. The build method will use this to create the execution graph.
      * @param targetDataClass Class name for the data to be generated.
-     * @return
+     * @return this builder
      */
     public DataFlowBuilder withTargetData(Class<? extends DataAdapter> targetDataClass) {
         this.dataFlow.setTargetData(Utils.name(targetDataClass));
@@ -196,7 +197,7 @@ public class DataFlowBuilder {
     /**
      * The data to be generated. The build method will use this to create the execution graph.
      * @param data Logical name for the data to be generated.
-     * @return
+     * @return this builder
      */
     public DataFlowBuilder withTargetData(String data) {
         this.dataFlow.setTargetData(data);
@@ -207,7 +208,7 @@ public class DataFlowBuilder {
      * Register a resolution spec to resolve conflicts in scenarios when multiple builders known to the system can generate the same required data.
      * @param data Data to be generated
      * @param generatingBuilder Name of the builder that will generate this data in the context of the flow being built
-     * @return
+     * @return this builder
      */
     public DataFlowBuilder withResolutionSpec(final String data, final String generatingBuilder) {
         this.dataFlow.getResolutionSpecs().put(data, generatingBuilder);
@@ -218,7 +219,7 @@ public class DataFlowBuilder {
      * Register a resolution spec to resolve conflicts in scenarios when multiple builders known to the system can generate the same required data.
      * @param data Data to be generated
      * @param generatingBuilder Name of the builder that will generate this data in the context of the flow being built
-     * @return
+     * @return this builder
      */
     public DataFlowBuilder withResolutionSpec(final Class<? extends Data> data, final Class<? extends DataBuilder> generatingBuilder) {
         this.dataFlow.getResolutionSpecs().put(Utils.name(data), Utils.name(generatingBuilder));
@@ -229,7 +230,7 @@ public class DataFlowBuilder {
      * Register a transient data
      *
      * @param data Name of transient data
-     * @return
+     * @return this builder
      */
     public DataFlowBuilder withTransientData(String data) {
         dataFlow.getTransients().add(data);
@@ -240,7 +241,7 @@ public class DataFlowBuilder {
      * Register a transient data by class name
      *
      * @param dataClass Class of the data. Name will be derived from this
-     * @return
+     * @return this builder
      */
     public DataFlowBuilder withTransientDataClass(Class<? extends Data> dataClass) {
         dataFlow.getTransients().add(Utils.name(dataClass));
@@ -251,7 +252,7 @@ public class DataFlowBuilder {
      * Register a transient data
      *
      * @param data Names of transient data
-     * @return
+     * @return this builder
      */
     public DataFlowBuilder withTransientData(Collection<String> data) {
         dataFlow.getTransients().addAll(data);
@@ -262,7 +263,7 @@ public class DataFlowBuilder {
      * Register a transient data by class name
      *
      * @param dataClasses Classes of the data. Name will be derived from this
-     * @return
+     * @return this builder
      */
     public DataFlowBuilder withTransientDataClasses(Collection<Class<? extends Data>> dataClasses) {
         dataFlow.getTransients().addAll(

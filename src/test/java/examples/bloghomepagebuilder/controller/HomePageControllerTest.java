@@ -1,12 +1,13 @@
 package examples.bloghomepagebuilder.controller;
 
-import io.appform.databuilderframework.engine.*;
-import io.appform.databuilderframework.model.DataFlow;
 import com.google.common.base.Stopwatch;
 import examples.bloghomepagebuilder.builders.*;
 import examples.bloghomepagebuilder.data.HomePageRequest;
 import examples.bloghomepagebuilder.data.HomePageResponse;
+import io.appform.databuilderframework.engine.*;
+import io.appform.databuilderframework.model.DataFlow;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -43,10 +44,15 @@ public class HomePageControllerTest {
         runHomePageTest(new MultiThreadedDataFlowExecutor(Executors.newFixedThreadPool(10)));
     }
 
+    @Test
+    public void testHomePageMTOpt() throws Exception {
+        runHomePageTest(new OptimizedMultiThreadedDataFlowExecutor(Executors.newFixedThreadPool(10)));
+    }
+
     private void runHomePageTest(DataFlowExecutor executor) throws Exception {
-        final HomePageRequest request = new HomePageRequest("2321312312", "2323454", "Blah".getBytes());
-        Stopwatch stopwatch = Stopwatch.createStarted();
-        for(long i = 0; i < 100000; i++) {
+        val request = new HomePageRequest("2321312312", "2323454", "Blah".getBytes());
+        val stopwatch = Stopwatch.createStarted();
+        for(long i = 0; i < 100_000; i++) {
             HomePageResponse response = executor.run(homePageDataFlow, request).get(HomePageResponse.class);
             Assert.assertNotNull(response);
             //System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(response));

@@ -7,12 +7,13 @@ import io.appform.databuilderframework.engine.DataBuilderException;
 import io.appform.databuilderframework.model.Data;
 import examples.bloghomepagebuilder.data.ApiAuthValid;
 import examples.bloghomepagebuilder.data.HomePageRequest;
+import lombok.val;
 
 @DataBuilderClassInfo(produces = ApiAuthValid.class, consumes = HomePageRequest.class)
 public class ApiAuthChecker extends DataBuilder {
     @Override
     public Data process(DataBuilderContext context) throws DataBuilderException {
-        HomePageRequest request = context.getDataSet().accessor().get(HomePageRequest.class);
+        val request = context.getDataSet().accessor().get(HomePageRequest.class);
         //Do actual validation....
         return new ApiAuthValid(true, request.getUserAuthToken());
     }

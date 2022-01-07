@@ -2,17 +2,19 @@ package io.appform.databuilderframework.engine;
 
 
 import io.appform.databuilderframework.model.DataExecutionResponse;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+import lombok.Value;
 
+import java.util.Collections;
 import java.util.Map;
 
-public class DataBuilderFrameworkException extends Exception {
-    private Map<String,Object> details;
-	private DataExecutionResponse partialExecutionResponse;
-    public ErrorCode getErrorCode() {
-        return errorCode;
-    }
+@Value
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
+public class DataBuilderFrameworkException extends RuntimeException {
 
-    public static enum ErrorCode {
+    public enum ErrorCode {
         PRE_PROCESSING_ERROR,
         POST_PROCESSING_ERROR,
         NO_FACTORY_FOR_DATA_BUILDER,
@@ -25,42 +27,39 @@ public class DataBuilderFrameworkException extends Exception {
         BUILDER_EXECUTION_ERROR
     }
 
-    private final ErrorCode errorCode;
+    ErrorCode errorCode;
+    Map<String, Object> details;
+    DataExecutionResponse partialExecutionResponse;
 
     public DataBuilderFrameworkException(ErrorCode errorCode, String message) {
-        super(message);
-        this.errorCode = errorCode;
+        this(errorCode, message, Collections.emptyMap());
     }
 
     public DataBuilderFrameworkException(ErrorCode errorCode, String message, Throwable cause) {
-        super(message, cause);
-        this.errorCode = errorCode;
+        this(errorCode, message, Collections.emptyMap(), cause);
     }
 
     public DataBuilderFrameworkException(ErrorCode errorCode, String message, Map<String, Object> details) {
-        super(message);
-        this.errorCode = errorCode;
-        this.details=details;
+        this(errorCode, message, details, null);
     }
 
-    public DataBuilderFrameworkException(ErrorCode errorCode, String message, Map<String, Object> details, Throwable cause) {
+    public DataBuilderFrameworkException(
+            ErrorCode errorCode,
+            String message,
+            Map<String, Object> details,
+            Throwable cause) {
+        this(errorCode, message, details, cause, null);
+    }
+
+    public DataBuilderFrameworkException(
+            ErrorCode errorCode,
+            String message,
+            Map<String, Object> details,
+            Throwable cause,
+            DataExecutionResponse partialExecutionResponse) {
         super(message, cause);
         this.errorCode = errorCode;
-        this.details=details;
+        this.details = details;
+        this.partialExecutionResponse = partialExecutionResponse;
     }
-
-	public DataBuilderFrameworkException(ErrorCode errorCode, String message, Map<String, Object> details, Throwable cause, DataExecutionResponse partialExecutionResponse){
-		super(message, cause);
-		this.errorCode = errorCode;
-		this.details = details;
-		this.partialExecutionResponse = partialExecutionResponse;
-	}
-
-    public Map<String, Object> getDetails() {
-        return details;
-    }
-
-	public DataExecutionResponse getPartialExecutionResponse() {
-		return partialExecutionResponse;
-	}
 }

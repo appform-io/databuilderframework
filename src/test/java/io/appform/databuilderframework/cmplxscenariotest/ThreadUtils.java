@@ -8,7 +8,6 @@ package io.appform.databuilderframework.cmplxscenariotest;
 public enum ThreadUtils {
 	INSTANCE;
 
-
 	public void putToSleep(int duration,String builderName){
 		String name = Thread.currentThread().getName().split(":")[0];
 		try {

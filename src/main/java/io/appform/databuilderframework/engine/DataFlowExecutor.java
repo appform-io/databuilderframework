@@ -1,23 +1,24 @@
 package io.appform.databuilderframework.engine;
 
-import io.appform.databuilderframework.model.*;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.appform.databuilderframework.model.*;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * The executor for a {@link io.appform.databuilderframework.model.DataFlow}.
  */
+@Slf4j
 public abstract class DataFlowExecutor {
-    private static final Logger logger = LoggerFactory.getLogger(DataFlowExecutor.class.getSimpleName());
     protected List<DataBuilderExecutionListener> dataBuilderExecutionListener;
     private final DataBuilderFactory dataBuilderFactory;
 
-    public DataFlowExecutor(DataBuilderFactory dataBuilderFactory) {
+    protected DataFlowExecutor(DataBuilderFactory dataBuilderFactory) {
         this.dataBuilderExecutionListener = Lists.newArrayList();
         this.dataBuilderFactory = dataBuilderFactory;
     }
@@ -25,7 +26,7 @@ public abstract class DataFlowExecutor {
     /**
      * The executor will use the builder factory in the DataFlow.
      */
-    public DataFlowExecutor() {
+    protected DataFlowExecutor() {
         this.dataBuilderExecutionListener = Lists.newArrayList();
         this.dataBuilderFactory = null;
     }
@@ -33,28 +34,37 @@ public abstract class DataFlowExecutor {
     /**
      * Execute a data flow built using {@link io.appform.databuilderframework.engine.DataFlowBuilder}.
      * This should be used when using the framework in single request context.
+     *
      * @param dataFlow A data-flow built using {@link io.appform.databuilderframework.engine.DataFlowBuilder}.
-     * @param data The {@link io.appform.databuilderframework.model.Data} objects to be used as input to execute this flow.
+     * @param data     The {@link io.appform.databuilderframework.model.Data} objects to be used as input to execute this flow.
      * @return A response containing responses from every {@link DataBuilder}
-     * @throws DataBuilderFrameworkException
+     * @throws DataBuilderFrameworkException if builder could not be instantiated
      */
-    public DataExecutionResponse run(final DataFlow dataFlow, Data... data) throws DataBuilderFrameworkException, DataValidationException {
+    public DataExecutionResponse run(
+            final DataFlow dataFlow,
+            Data... data) throws DataBuilderFrameworkException, DataValidationException {
         return run(dataFlow, new DataDelta(data));
     }
 
     /**
      * Execute a data flow built using {@link io.appform.databuilderframework.engine.DataFlowBuilder}.
      * This should be used when using the framework in single request context.
-     * @param dataFlow A data-flow built using {@link io.appform.databuilderframework.engine.DataFlowBuilder}.
+     *
+     * @param dataFlow  A data-flow built using {@link io.appform.databuilderframework.engine.DataFlowBuilder}.
      * @param dataDelta A {@link io.appform.databuilderframework.model.DataDelta} of objects to be used as input to execute this flow.
      * @return A response containing responses from every {@link DataBuilder}.
-     * @throws DataBuilderFrameworkException
+     * @throws DataBuilderFrameworkException if builder could not be instantiated
      */
-    public DataExecutionResponse run(final DataFlow dataFlow,
-                                     DataDelta dataDelta) throws DataBuilderFrameworkException, DataValidationException {
-        Preconditions.checkNotNull(dataFlow);
+    public DataExecutionResponse run(
+            final DataFlow dataFlow,
+            DataDelta dataDelta) throws DataBuilderFrameworkException, DataValidationException {
+        Objects.requireNonNull(dataFlow);
         Preconditions.checkArgument(null != dataFlow.getDataBuilderFactory() || null != dataBuilderFactory);
-        return process(new DataBuilderContext(), new DataFlowInstance(), dataDelta, dataFlow, dataFlow.getDataBuilderFactory());
+        return process(new DataBuilderContext(),
+                       new DataFlowInstance(),
+                       dataDelta,
+                       dataFlow,
+                       dataFlow.getDataBuilderFactory());
     }
 
     /**
@@ -68,9 +78,11 @@ public abstract class DataFlowExecutor {
      * @param data             The additional set of data to be considered for execution.
      * @return A response containing responses from every {@link DataBuilder}
      * that was invoked in this stage. Note that these have already been added to the DataSet before returning.
-     * @throws DataBuilderFrameworkException
+     * @throws DataBuilderFrameworkException if builder could not be instantiated
      */
-    public DataExecutionResponse run(DataFlowInstance dataFlowInstance, Data... data) throws DataBuilderFrameworkException, DataValidationException {
+    public DataExecutionResponse run(
+            DataFlowInstance dataFlowInstance,
+            Data... data) throws DataBuilderFrameworkException, DataValidationException {
         return run(dataFlowInstance, new DataDelta(data));
     }
 
@@ -85,14 +97,17 @@ public abstract class DataFlowExecutor {
      * @param dataDelta        The additional set of data to be considered for execution.
      * @return A response containing responses from every {@link DataBuilder}
      * that was invoked in this stage. Note that these have already been added to the DataSet before returning.
-     * @throws DataBuilderFrameworkException
+     * @throws DataBuilderFrameworkException if builder could not be instantiated
      */
-    public DataExecutionResponse run(DataFlowInstance dataFlowInstance, DataDelta dataDelta) throws DataBuilderFrameworkException,DataValidationException {
-        DataBuilderContext dataBuilderContext = DataBuilderContext.builder()
-                .dataSet(dataFlowInstance.getDataSet())
-                .contextData(Maps.newHashMap())
-                .build();
-        return run(dataBuilderContext, dataFlowInstance, dataDelta);
+    public DataExecutionResponse run(
+            DataFlowInstance dataFlowInstance,
+            DataDelta dataDelta) throws DataBuilderFrameworkException, DataValidationException {
+        return run(DataBuilderContext.builder()
+                           .dataSet(dataFlowInstance.getDataSet())
+                           .contextData(new HashMap<>())
+                           .build(),
+                   dataFlowInstance,
+                   dataDelta);
     }
 
     /**
@@ -107,70 +122,54 @@ public abstract class DataFlowExecutor {
      * @param dataDelta          The set of data to be considered for analysis.
      * @return A response containing responses from every {@link DataBuilder}
      * that was invoked in this stage. Note that these have already been added to the DataSet before returning.
-     * @throws DataBuilderFrameworkException
+     * @throws DataBuilderFrameworkException if builder could not be instantiated
      */
-    public DataExecutionResponse run(DataBuilderContext dataBuilderContext,
-                                              DataFlowInstance dataFlowInstance,
-                                              DataDelta dataDelta) throws DataBuilderFrameworkException, DataValidationException {
-        DataFlow dataFlow = dataFlowInstance.getDataFlow();
+    public DataExecutionResponse run(
+            DataBuilderContext dataBuilderContext,
+            DataFlowInstance dataFlowInstance,
+            DataDelta dataDelta) throws DataBuilderFrameworkException, DataValidationException {
+        val dataFlow = dataFlowInstance.getDataFlow();
         Preconditions.checkArgument(null != dataFlow.getDataBuilderFactory()
-                || null != dataBuilderFactory);
-        DataBuilderFactory builderFactory = dataFlow.getDataBuilderFactory();
-        if(null == builderFactory) {
-            builderFactory = dataBuilderFactory;
-        }
-        if(null == builderFactory) {
+                                            || null != dataBuilderFactory);
+        val existingFactory = dataFlow.getDataBuilderFactory();
+        val builderFactory = null != existingFactory
+                             ? existingFactory
+                             : dataBuilderFactory;
+        if (null == builderFactory) {
             throw new DataBuilderFrameworkException(DataBuilderFrameworkException.ErrorCode.NO_FACTORY_FOR_DATA_BUILDER,
-                                                "No builder specified in contructor or dataflow");
+                                                    "No builder specified in contructor or dataflow");
         }
         return process(dataBuilderContext, dataFlowInstance, dataDelta, dataFlow, builderFactory);
     }
 
-    protected DataExecutionResponse process(DataBuilderContext dataBuilderContext,
-                                            DataFlowInstance dataFlowInstance,
-                                            DataDelta dataDelta,
-                                            DataFlow dataFlow,
-                                            DataBuilderFactory builderFactory) throws DataBuilderFrameworkException, DataValidationException {
+    protected DataExecutionResponse process(
+            DataBuilderContext dataBuilderContext,
+            DataFlowInstance dataFlowInstance,
+            DataDelta dataDelta,
+            DataFlow dataFlow,
+            DataBuilderFactory builderFactory) throws DataBuilderFrameworkException, DataValidationException {
         DataExecutionResponse response = null;
         Throwable frameworkException = null;
         try {
-            for (DataBuilderExecutionListener listener : dataBuilderExecutionListener) {
-                try {
-                    listener.preProcessing(dataBuilderContext, dataFlowInstance, dataDelta);
-                } catch (Throwable t) {
-                    if(listener.shouldThrowException()) {
-                        throw new DataBuilderFrameworkException(DataBuilderFrameworkException.ErrorCode.PRE_PROCESSING_ERROR,
-                                "Error running pre-processing listener: " +  t.getMessage(), t);
-                    }
-                    logger.error("Error running pre-processing listener: ", t);
-                }
-            }
+            executePreListeners(dataBuilderContext, dataFlowInstance, dataDelta);
             response = run(dataBuilderContext, dataFlowInstance, dataDelta, dataFlow, builderFactory);
             return response;
-        } catch (DataBuilderFrameworkException e) {
+        }
+        catch (DataBuilderFrameworkException e) {
             frameworkException = e;
             throw e;
-        } finally {
-            for (DataBuilderExecutionListener listener : dataBuilderExecutionListener) {
-                try {
-                    listener.postProcessing(dataBuilderContext, dataFlowInstance, dataDelta, response, frameworkException);
-                } catch (Throwable t) {
-                    if(listener.shouldThrowException()) {
-                        throw new DataBuilderFrameworkException(DataBuilderFrameworkException.ErrorCode.POST_PROCESSING_ERROR,
-                                "Error running post-processing listener: " +  t.getMessage(), t);
-                    }
-                    logger.error("Error running post-processing listener: ", t);
-
-                }
-            }
+        }
+        finally {
+            executePostListeners(dataBuilderContext, dataFlowInstance, dataDelta, response, frameworkException);
         }
     }
 
-    abstract protected DataExecutionResponse run(DataBuilderContext dataBuilderContext,
-                                                 DataFlowInstance dataFlowInstance,
-                                                 DataDelta dataDelta,
-                                                 DataFlow dataFlow,
-                                                 DataBuilderFactory builderFactory) throws DataBuilderFrameworkException, DataValidationException;
+    protected abstract DataExecutionResponse run(
+            DataBuilderContext dataBuilderContext,
+            DataFlowInstance dataFlowInstance,
+            DataDelta dataDelta,
+            DataFlow dataFlow,
+            DataBuilderFactory builderFactory) throws DataBuilderFrameworkException, DataValidationException;
 
     /**
      * A instance of {@link io.appform.databuilderframework.engine.DataBuilderExecutionListener}
@@ -181,5 +180,50 @@ public abstract class DataFlowExecutor {
      */
     public void registerExecutionListener(DataBuilderExecutionListener listener) {
         dataBuilderExecutionListener.add(listener);
+    }
+
+    private void executePreListeners(
+            DataBuilderContext dataBuilderContext,
+            DataFlowInstance dataFlowInstance,
+            DataDelta dataDelta) throws DataBuilderFrameworkException {
+        for (DataBuilderExecutionListener listener : dataBuilderExecutionListener) {
+            try {
+                listener.preProcessing(dataBuilderContext, dataFlowInstance, dataDelta);
+            }
+            catch (Throwable t) {
+                if (listener.shouldThrowException()) {
+                    throw new DataBuilderFrameworkException(DataBuilderFrameworkException.ErrorCode.PRE_PROCESSING_ERROR,
+                                                            "Error running pre-processing listener: " + t.getMessage(),
+                                                            t);
+                }
+                log.error("Error running pre-processing listener: ", t);
+            }
+        }
+    }
+
+    private void executePostListeners(
+            DataBuilderContext dataBuilderContext,
+            DataFlowInstance dataFlowInstance,
+            DataDelta dataDelta,
+            DataExecutionResponse response,
+            Throwable frameworkException) throws DataBuilderFrameworkException {
+        for (DataBuilderExecutionListener listener : dataBuilderExecutionListener) {
+            try {
+                listener.postProcessing(dataBuilderContext,
+                                        dataFlowInstance,
+                                        dataDelta,
+                                        response,
+                                        frameworkException);
+            }
+            catch (Throwable t) {
+                if (listener.shouldThrowException()) {
+                    throw new DataBuilderFrameworkException(DataBuilderFrameworkException.ErrorCode.POST_PROCESSING_ERROR,
+                                                            "Error running post-processing listener: " + t.getMessage(),
+                                                            t);
+                }
+                log.error("Error running post-processing listener: ", t);
+
+            }
+        }
     }
 }

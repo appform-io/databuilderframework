@@ -8,53 +8,59 @@ import com.google.common.base.CaseFormat;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import io.appform.databuilderframework.model.DataDelta;
+import io.appform.databuilderframework.model.DataFlowInstance;
+import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
 
 /**
  * Utilities for various stuff
  */
-public interface Utils {
+@UtilityClass
+@Slf4j
+public final class Utils {
 
-    static String name(Object object) {
+    public static String name(Object object) {
         return name(object.getClass());
     }
 
-    static String name(Class<?> clazz) {
+    public static String name(Class<?> clazz) {
         return CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, clazz.getSimpleName());
     }
 
-    static boolean isEmpty(Collection collection) {
+    public static boolean isEmpty(Collection collection) {
         return null == collection || collection.isEmpty();
     }
 
-    static boolean isEmpty(Map collection) {
+    public static boolean isEmpty(Map collection) {
         return null == collection || collection.isEmpty();
     }
 
-    static<T> Set<T> sanitize(Set<T> collection) {
+    public static<T> Set<T> sanitize(Set<T> collection) {
         return isEmpty(collection)
                 ? Collections.emptySet()
                 : collection;
     }
 
-    static<T> List<T> sanitize(List<T> collection) {
+    public static<T> List<T> sanitize(List<T> collection) {
         return isEmpty(collection)
                 ? Collections.emptyList()
                 : collection;
     }
 
-    static<K,V> Map<K, V> sanitize(Map<K,V> collection) {
+    public static<K,V> Map<K, V> sanitize(Map<K,V> collection) {
         return isEmpty(collection)
                 ? Collections.emptyMap()
                 : collection;
     }
 
-    static<T extends DataBuilder> DataBuilderMeta meta(T annotatedDataBuilder) {
+    public static<T extends DataBuilder> DataBuilderMeta meta(T annotatedDataBuilder) {
         return meta(annotatedDataBuilder.getClass());
     }
 
-    static DataBuilderMeta meta(Class<? extends DataBuilder> annotatedDataBuilder) {
+    public static DataBuilderMeta meta(Class<? extends DataBuilder> annotatedDataBuilder) {
         DataBuilderInfo info = annotatedDataBuilder.getAnnotation(DataBuilderInfo.class);
         if(null != info) {
             return new DataBuilderMeta(
@@ -96,6 +102,25 @@ public interface Utils {
                     ImmutableSet.copyOf(optionals),
                     ImmutableSet.copyOf(access)
             );
+        }
+    }
+
+    public static void executePostExeceptionListener(
+            DataBuilderContext dataBuilderContext,
+            DataFlowInstance dataFlowInstance,
+            DataDelta dataDelta,
+            Map<String, Data> responseData,
+            DataBuilderMeta builderMeta,
+            DataValidationException e,
+            List<DataBuilderExecutionListener> dataBuilderExecutionListener) {
+        log.error("Validation error in data produced by builder" + builderMeta.getName());
+        for (DataBuilderExecutionListener listener : dataBuilderExecutionListener) {
+            try {
+                listener.afterException(dataBuilderContext, dataFlowInstance, builderMeta, dataDelta, responseData, e);
+
+            } catch (Throwable error) {
+                log.error("Error running post-execution listener: ", error);
+            }
         }
     }
 }
