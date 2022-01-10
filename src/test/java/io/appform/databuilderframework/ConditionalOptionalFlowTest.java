@@ -1,99 +1,95 @@
 package io.appform.databuilderframework;
 
 
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import io.appform.databuilderframework.engine.*;
 import io.appform.databuilderframework.engine.impl.InstantiatingDataBuilderFactory;
 import io.appform.databuilderframework.model.*;
-import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
-
-import org.junit.Assert;
-import org.junit.Before;
+import lombok.val;
 import org.junit.Test;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 public class ConditionalOptionalFlowTest {
-	private DataBuilderMetadataManager dataBuilderMetadataManager = new DataBuilderMetadataManager();
-	private DataFlowExecutor executor = new SimpleDataFlowExecutor(new InstantiatingDataBuilderFactory(dataBuilderMetadataManager));
-	private ExecutionGraphGenerator executionGraphGenerator = new ExecutionGraphGenerator(dataBuilderMetadataManager);
-	private DataFlow dataFlow;
-	private DataFlow dataFlowError = new DataFlow();
+    private final DataBuilderMetadataManager dataBuilderMetadataManager = new DataBuilderMetadataManager()
+            .register(ImmutableSet.of("A", "B"), "C", "BuilderA", TestBuilderA.class) //concats A and B values
+            .registerWithOptionals(ImmutableSet.of("C", "D"),
+                                   ImmutableSet.of("G"),
+                                   "E",
+                                   "BuilderB",
+                                   ConditionalBuilder.class)
+            .register(ImmutableSet.of("A", "E"), "F", "BuilderC", TestBuilderC.class);
 
-	// conditional builder here runs if C and D are present.
-	// if C == "Hello World"
-	// and D == "this" or G is present and G == this
-	public static final class ConditionalBuilder extends DataBuilder {
+    private final DataFlowExecutor executor = new SimpleDataFlowExecutor(new InstantiatingDataBuilderFactory(
+            dataBuilderMetadataManager));
 
-		@Override
-		public Data process(DataBuilderContext context) throws DataBuilderException {
-			DataSetAccessor accessor = new DataSetAccessor(context.getDataSet());
-			TestDataC dataC = accessor.get("C", TestDataC.class);
-			TestDataD dataD = accessor.get("D", TestDataD.class);
-			Boolean isGPresent = accessor.checkForData("G");
+    private final DataFlow dataFlow = new DataFlowBuilder()
+            .withMetaDataManager(dataBuilderMetadataManager)
+            .withTargetData("F")
+            .build();
 
-			if(dataC.getValue().equals("Hello World")){
-				if( dataD.getValue().equalsIgnoreCase("this")) {
-					return new TestDataE("Wah wah!!");
-				}else if(isGPresent){
-					TestDataG dataG = accessor.get("G",TestDataG.class);
-					if(dataG.getValue().equalsIgnoreCase("this")){
-						return new TestDataE("Wah wah!!");
-					}
-				}
+    // conditional builder here runs if C and D are present.
+    // if C == "Hello World"
+    // and D == "this" or G is present and G == this
+    public static final class ConditionalBuilder extends DataBuilder {
 
-			}
-			return null;
-		}
-	}
+        @Override
+        public Data process(DataBuilderContext context) throws DataBuilderException {
+            val accessor = new DataSetAccessor(context.getDataSet());
+            val dataC = accessor.get("C", TestDataC.class);
+            val dataD = accessor.get("D", TestDataD.class);
+            val isGPresent = accessor.checkForData("G");
 
-	@Before
-	public void setup() throws Exception {
-		dataBuilderMetadataManager.register(ImmutableSet.of("A", "B"), "C", "BuilderA", TestBuilderA.class ); //concats A and B values
-		dataBuilderMetadataManager.registerWithOptionals(ImmutableSet.of("C", "D"),ImmutableSet.of("G"), "E", "BuilderB", ConditionalBuilder.class );
-		dataBuilderMetadataManager.register(ImmutableSet.of("A", "E"), "F", "BuilderC", TestBuilderC.class );
+            if (dataC.getValue().equals("Hello World")) {
+                if (dataD.getValue().equalsIgnoreCase("this")) {
+                    return new TestDataE("Wah wah!!");
+                }
+                else if (isGPresent) {
+                    TestDataG dataG = accessor.get("G", TestDataG.class);
+                    if (dataG.getValue().equalsIgnoreCase("this")) {
+                        return new TestDataE("Wah wah!!");
+                    }
+                }
 
-		dataFlow = new DataFlowBuilder()
-		.withMetaDataManager(dataBuilderMetadataManager)
-		.withTargetData("F")
-		.build();
+            }
+            return null;
+        }
+    }
 
-		dataFlowError = new DataFlowBuilder()
-		.withMetaDataManager(dataBuilderMetadataManager)
-		.withTargetData("Y")
-		.build();
+    @Test
+    public void testRunWithOptional() throws Exception {
+        val dataFlowInstance = new DataFlowInstance()
+                .setId("testflow")
+                .setDataFlow(dataFlow);
+        {
+            val dataDelta = new DataDelta(Lists.<Data>newArrayList(new TestDataA("Hello"),
+                                                                         new TestDataB("World"),
+                                                                         new TestDataD("notThis")));
+            val response = executor.run(dataFlowInstance, dataDelta);
+            assertTrue(response.getResponses().containsKey("C"));
+            assertFalse(response.getResponses().containsKey("E"));
+        }
+        {
+            val dataDelta = new DataDelta(Lists.<Data>newArrayList(new TestDataG("notThis")));
+            val response = executor.run(dataFlowInstance, dataDelta);
+            assertFalse(response.getResponses().containsKey("E"));
+            assertFalse(response.getResponses().containsKey("C"));
+        }
+        {
+            val dataDelta = new DataDelta(Lists.<Data>newArrayList(new TestDataG("this")));
+            val response = executor.run(dataFlowInstance, dataDelta);
+            assertTrue(response.getResponses().containsKey("E"));
+            assertTrue(response.getResponses().containsKey("F"));
+        }
+        {
+            val dataDelta = new DataDelta(Lists.<Data>newArrayList(new TestDataD("this")));
+            val response = executor.run(dataFlowInstance, dataDelta);
+            assertTrue(response.getResponses().containsKey("E"));
+            assertTrue(response.getResponses().containsKey("F"));
+        }
 
-	}
-
-	@Test
-	public void testRunWithOptional() throws Exception {
-		DataFlowInstance dataFlowInstance = new DataFlowInstance();
-		dataFlowInstance.setId("testflow");
-		dataFlowInstance.setDataFlow(dataFlow);
-		{
-			DataDelta dataDelta = new DataDelta(Lists.<Data>newArrayList(new TestDataA("Hello"), new TestDataB("World"), new TestDataD("notThis")));
-			DataExecutionResponse response = executor.run(dataFlowInstance, dataDelta);
-			Assert.assertTrue(response.getResponses().containsKey("C"));
-			Assert.assertFalse(response.getResponses().containsKey("E"));
-		}
-		{
-			DataDelta dataDelta = new DataDelta(Lists.<Data>newArrayList(new TestDataG("notThis")));
-			DataExecutionResponse response = executor.run(dataFlowInstance, dataDelta);
-			Assert.assertFalse(response.getResponses().containsKey("E"));
-			Assert.assertFalse(response.getResponses().containsKey("C"));
-		}
-		{
-			DataDelta dataDelta = new DataDelta(Lists.<Data>newArrayList(new TestDataG("this")));
-			DataExecutionResponse response = executor.run(dataFlowInstance, dataDelta);
-			Assert.assertTrue(response.getResponses().containsKey("E"));
-			Assert.assertTrue(response.getResponses().containsKey("F"));
-		}
-		{
-			DataDelta dataDelta = new DataDelta(Lists.<Data>newArrayList(new TestDataD("this")));
-			DataExecutionResponse response = executor.run(dataFlowInstance, dataDelta);
-			Assert.assertTrue(response.getResponses().containsKey("E"));
-			Assert.assertTrue(response.getResponses().containsKey("F"));
-		}
-
-	}
+    }
 
 }

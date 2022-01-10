@@ -177,9 +177,11 @@ public abstract class DataFlowExecutor {
      * They will be called in order.
      *
      * @param listener Register a listener to be invoked during execution.
+     * @return The executor itself for chaining
      */
-    public void registerExecutionListener(DataBuilderExecutionListener listener) {
+    public DataFlowExecutor registerExecutionListener(DataBuilderExecutionListener listener) {
         dataBuilderExecutionListener.add(listener);
+        return this;
     }
 
     private void executePreListeners(
