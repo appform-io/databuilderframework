@@ -12,7 +12,7 @@ import lombok.val;
 import java.util.Map;
 
 /**
- * @inheritDoc This particular version, uses metadata stored in {@link io.appform.databuilderframework.engine.DataBuilderMetadataManager}
+ * {@inheritDoc} This particular version, uses metadata stored in {@link io.appform.databuilderframework.engine.DataBuilderMetadataManager}
  * to generate a specific builder.
  */
 public class MixedDataBuilderFactory implements DataBuilderFactory {

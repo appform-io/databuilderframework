@@ -71,8 +71,7 @@ public class DataSetAccessor {
 
     /**
      * Merge data with current {@link io.appform.databuilderframework.model.DataSet}.
-     * Data will be added to the current data-set and override data with same type as identified by
-     * {@link io.appform.databuilderframework.model.Data#getData()}
+     * Data will be added to the current data-set and override data with same type
      *
      * @param data {@link io.appform.databuilderframework.model.Data} to be merged.
      */

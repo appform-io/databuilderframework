@@ -8,7 +8,7 @@ import io.appform.databuilderframework.model.DataBuilderMeta;
 import lombok.val;
 
 /**
- * @inheritDoc This particular version, uses metadata stored in {@link io.appform.databuilderframework.engine.DataBuilderMetadataManager}
+ * {@inheritDoc} This particular version, uses metadata stored in {@link io.appform.databuilderframework.engine.DataBuilderMetadataManager}
  * to generate a specific builder.
  */
 public class InstantiatingDataBuilderFactory implements DataBuilderFactory {
