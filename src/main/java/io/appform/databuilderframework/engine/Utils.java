@@ -1,15 +1,13 @@
 package io.appform.databuilderframework.engine;
 
-import io.appform.databuilderframework.annotations.DataBuilderClassInfo;
-import io.appform.databuilderframework.annotations.DataBuilderInfo;
-import io.appform.databuilderframework.model.Data;
-import io.appform.databuilderframework.model.DataBuilderMeta;
 import com.google.common.base.CaseFormat;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import io.appform.databuilderframework.model.DataDelta;
-import io.appform.databuilderframework.model.DataFlowInstance;
+import io.appform.databuilderframework.annotations.DataBuilderClassInfo;
+import io.appform.databuilderframework.annotations.DataBuilderInfo;
+import io.appform.databuilderframework.model.Data;
+import io.appform.databuilderframework.model.DataBuilderMeta;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,11 +28,11 @@ public final class Utils {
         return CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, clazz.getSimpleName());
     }
 
-    public static boolean isEmpty(Collection collection) {
+    public static<T> boolean isEmpty(Collection<T> collection) {
         return null == collection || collection.isEmpty();
     }
 
-    public static boolean isEmpty(Map collection) {
+    public static<K,V> boolean isEmpty(Map<K,V> collection) {
         return null == collection || collection.isEmpty();
     }
 
@@ -102,25 +100,6 @@ public final class Utils {
                     ImmutableSet.copyOf(optionals),
                     ImmutableSet.copyOf(access)
             );
-        }
-    }
-
-    public static void executePostExeceptionListener(
-            DataBuilderContext dataBuilderContext,
-            DataFlowInstance dataFlowInstance,
-            DataDelta dataDelta,
-            Map<String, Data> responseData,
-            DataBuilderMeta builderMeta,
-            DataValidationException e,
-            List<DataBuilderExecutionListener> dataBuilderExecutionListener) {
-        log.error("Validation error in data produced by builder" + builderMeta.getName());
-        for (DataBuilderExecutionListener listener : dataBuilderExecutionListener) {
-            try {
-                listener.afterException(dataBuilderContext, dataFlowInstance, builderMeta, dataDelta, responseData, e);
-
-            } catch (Throwable error) {
-                log.error("Error running post-execution listener: ", error);
-            }
         }
     }
 }
