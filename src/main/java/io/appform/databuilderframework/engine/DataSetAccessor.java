@@ -82,7 +82,7 @@ public class DataSetAccessor {
     /**
      * Merge all {@link io.appform.databuilderframework.model.Data} elements from the {@link io.appform.databuilderframework.model.DataDelta}
      * Will overwrite all data present in the current {@link io.appform.databuilderframework.model.DataSet}.
-     * Each elemnt of data is identified using {@link Data#getData()}
+     * Each element of data is identified using Data::getData()
      *
      * @param dataDelta {@link io.appform.databuilderframework.model.DataDelta} to be merged
      */
