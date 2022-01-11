@@ -2,9 +2,14 @@ package io.appform.databuilderframework.databuilderinstancetest;
 
 import io.appform.databuilderframework.annotations.DataBuilderClassInfo;
 import io.appform.databuilderframework.engine.*;
-import io.appform.databuilderframework.model.*;
-import org.junit.Assert;
+import io.appform.databuilderframework.model.Data;
+import io.appform.databuilderframework.model.DataAdapter;
+import io.appform.databuilderframework.model.DataDelta;
+import io.appform.databuilderframework.model.DataFlowInstance;
+import lombok.val;
 import org.junit.Test;
+
+import static org.junit.Assert.assertTrue;
 
 public class DataFlowBuilderTest {
 
@@ -57,18 +62,18 @@ public class DataFlowBuilderTest {
 
     @Test
     public void testInstantiatingBuilder() throws Exception {
-        DataFlow dataFlow = new DataFlowBuilder()
+        val dataFlow = new DataFlowBuilder()
                                         .withDataBuilder(new BuilderA())
                                         .withTargetData(TestDataC.class)
                                         .build();
-        DataFlowExecutor executor = new SimpleDataFlowExecutor();
-        DataFlowInstance instance = new DataFlowInstance();
+        val executor = new SimpleDataFlowExecutor();
+        val instance = new DataFlowInstance();
         instance.setDataFlow(dataFlow);
-        DataExecutionResponse response = executor.run(instance,
+        val response = executor.run(instance,
                                                       new DataDelta(
                                                           new TestDataA("Hello"),
                                                           new TestDataB("Santanu")));
-        Assert.assertTrue(response.getResponses().containsKey(Utils.name(TestDataC.class)));
+        assertTrue(response.getResponses().containsKey(Utils.name(TestDataC.class)));
     }
 
 }

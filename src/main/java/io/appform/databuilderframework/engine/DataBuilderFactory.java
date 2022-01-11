@@ -11,7 +11,7 @@ public interface DataBuilderFactory {
      * Create a {@link DataBuilder} of the given name.
      * @param dataBuilderMeta Meta for the builder to create
      * @return A {@link DataBuilder}
-     * @throws DataBuilderFrameworkException
+     * @throws DataBuilderFrameworkException Throws error if creation failed
      */
     DataBuilder create(DataBuilderMeta dataBuilderMeta) throws DataBuilderFrameworkException;
 

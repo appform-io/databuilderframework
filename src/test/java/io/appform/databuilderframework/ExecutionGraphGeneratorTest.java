@@ -1,195 +1,192 @@
 package io.appform.databuilderframework;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableSet;
 import io.appform.databuilderframework.engine.DataBuilderFrameworkException;
 import io.appform.databuilderframework.engine.DataBuilderMetadataManager;
 import io.appform.databuilderframework.engine.DataFlowBuilder;
 import io.appform.databuilderframework.engine.ExecutionGraphGenerator;
 import io.appform.databuilderframework.model.DataFlow;
-import io.appform.databuilderframework.model.ExecutionGraph;
-import com.google.common.collect.ImmutableSet;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Assert;
-import org.junit.Before;
+import lombok.val;
 import org.junit.Test;
 
 import java.util.Collections;
 
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 @Slf4j
 public class ExecutionGraphGeneratorTest {
-    private DataBuilderMetadataManager dataBuilderMetadataManager = new DataBuilderMetadataManager();
-    private ExecutionGraphGenerator executionGraphGenerator = new ExecutionGraphGenerator(dataBuilderMetadataManager);
+    private final DataBuilderMetadataManager dataBuilderMetadataManager = new DataBuilderMetadataManager()
+            .register(ImmutableSet.of("A", "B"), "C", "BuilderA", TestBuilderA.class)
+            .register(ImmutableSet.of("C", "D"), "E", "BuilderB", TestBuilderB.class)
+            .register(ImmutableSet.of("C", "E"), "F", "BuilderC", TestBuilderC.class)
+            .register(ImmutableSet.of("F"), "G", "BuilderD", TestBuilderD.class)
+            .register(ImmutableSet.of("E", "C"), "G", "BuilderE", TestBuilderE.class);
+    private final ExecutionGraphGenerator executionGraphGenerator = new ExecutionGraphGenerator(
+            dataBuilderMetadataManager);
 
-    @Before
-    public void setup() throws Exception {
-        dataBuilderMetadataManager.register(ImmutableSet.of("A", "B"), "C", "BuilderA", TestBuilderA.class );
-        dataBuilderMetadataManager.register(ImmutableSet.of("C", "D"), "E", "BuilderB", TestBuilderB.class );
-        dataBuilderMetadataManager.register(ImmutableSet.of("C", "E"), "F", "BuilderC", TestBuilderC.class );
-        dataBuilderMetadataManager.register(ImmutableSet.of("F"),      "G", "BuilderD", TestBuilderD.class );
-        dataBuilderMetadataManager.register(ImmutableSet.of("E", "C"), "G", "BuilderE", TestBuilderE.class );
-    }
 
     @Test
     public void testGenerateGraphNoTarget() throws Exception {
-        DataFlow dataFlow = new DataFlow();
-        dataFlow.setName("test");
+        val dataFlow = new DataFlow()
+                .setName("test");
         try {
             executionGraphGenerator.generateGraph(dataFlow);
-        } catch (DataBuilderFrameworkException e) {
-            if(DataBuilderFrameworkException.ErrorCode.NO_TARGET_DATA == e.getErrorCode()) {
-                return;
-            }
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
+        }
+        catch (DataBuilderFrameworkException e) {
+            assertEquals(DataBuilderFrameworkException.ErrorCode.NO_TARGET_DATA, e.getErrorCode());
+        }
+        catch (Exception e) {
+            log.error("Error raised: ", e);
             fail("Unexpected error");
         }
     }
 
     @Test
     public void testGenerateGraphEmptyTarget() throws Exception {
-        DataFlow dataFlow = new DataFlow();
-        dataFlow.setName("test");
-        dataFlow.setTargetData("");
+        val dataFlow = new DataFlow()
+                .setName("test")
+                .setTargetData("");
         try {
             executionGraphGenerator.generateGraph(dataFlow);
-        } catch (DataBuilderFrameworkException e) {
-            if(DataBuilderFrameworkException.ErrorCode.NO_TARGET_DATA == e.getErrorCode()) {
-                return;
-            }
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
+        }
+        catch (DataBuilderFrameworkException e) {
+            assertEquals(DataBuilderFrameworkException.ErrorCode.NO_TARGET_DATA, e.getErrorCode());
+        }
+        catch (Exception e) {
+            log.error("Error raised: ", e);
             fail("Unexpected error");
         }
     }
 
     @Test
     public void testGenerateGraphNoExecutors() throws Exception {
-        DataFlow dataFlow = new DataFlowBuilder()
+        val dataFlow = new DataFlowBuilder()
                 .withMetaDataManager(dataBuilderMetadataManager)
                 .withName("test")
                 .withTargetData("X")
                 .build();
-        ExecutionGraph e = dataFlow.getExecutionGraph();
-        Assert.assertTrue(e.getDependencyHierarchy().isEmpty());
+        val e = dataFlow.getExecutionGraph();
+        assertTrue(e.getDependencyHierarchy().isEmpty());
     }
 
     @Test
     public void testGenerate() throws Exception {
-        DataFlow dataFlow = new DataFlowBuilder()
+        val dataFlow = new DataFlowBuilder()
                 .withMetaDataManager(dataBuilderMetadataManager)
                 .withName("test")
                 .withTargetData("C")
                 .build();
-        ExecutionGraph e = dataFlow.getExecutionGraph();
-        Assert.assertFalse(e.getDependencyHierarchy().isEmpty());
-        Assert.assertEquals(1, e.getDependencyHierarchy().size());
-        Assert.assertEquals("BuilderA", e.getDependencyHierarchy().get(0).get(0).getName());
+        val e = dataFlow.getExecutionGraph();
+        assertFalse(e.getDependencyHierarchy().isEmpty());
+        assertEquals(1, e.getDependencyHierarchy().size());
+        assertEquals("BuilderA", e.getDependencyHierarchy().get(0).get(0).getName());
     }
 
     @Test
-    public void testGenerateTwoStep() throws Exception  {
-        DataFlow dataFlow = new DataFlowBuilder()
+    public void testGenerateTwoStep() throws Exception {
+        val dataFlow = new DataFlowBuilder()
                 .withMetaDataManager(dataBuilderMetadataManager)
                 .withName("test")
                 .withTargetData("E")
                 .build();
-        ExecutionGraph e = dataFlow.getExecutionGraph();
-        Assert.assertFalse(e.getDependencyHierarchy().isEmpty());
-        Assert.assertEquals(2, e.getDependencyHierarchy().size());
-        Assert.assertEquals("BuilderA", e.getDependencyHierarchy().get(0).get(0).getName());
-        Assert.assertEquals(1, e.getDependencyHierarchy().get(0).size());
-        Assert.assertEquals("BuilderB", e.getDependencyHierarchy().get(1).get(0).getName());
-        Assert.assertEquals(1, e.getDependencyHierarchy().get(1).size());
+        val e = dataFlow.getExecutionGraph();
+        assertFalse(e.getDependencyHierarchy().isEmpty());
+        assertEquals(2, e.getDependencyHierarchy().size());
+        assertEquals("BuilderA", e.getDependencyHierarchy().get(0).get(0).getName());
+        assertEquals(1, e.getDependencyHierarchy().get(0).size());
+        assertEquals("BuilderB", e.getDependencyHierarchy().get(1).get(0).getName());
+        assertEquals(1, e.getDependencyHierarchy().get(1).size());
     }
 
     @Test
-    public void testGenerateInterdependentStep() throws Exception  {
-        DataFlow dataFlow = new DataFlowBuilder()
+    public void testGenerateInterdependentStep() throws Exception {
+        val dataFlow = new DataFlowBuilder()
                 .withMetaDataManager(dataBuilderMetadataManager)
                 .withName("test")
                 .withTargetData("F")
                 .build();
-        ExecutionGraph e = dataFlow.getExecutionGraph();
-        Assert.assertEquals(3, e.getDependencyHierarchy().size());
-        Assert.assertEquals("BuilderA", e.getDependencyHierarchy().get(0).get(0).getName());
-        Assert.assertEquals(1, e.getDependencyHierarchy().get(0).size());
-        Assert.assertEquals("BuilderB", e.getDependencyHierarchy().get(1).get(0).getName());
-        Assert.assertEquals(1, e.getDependencyHierarchy().get(1).size());
-        Assert.assertEquals("BuilderC", e.getDependencyHierarchy().get(2).get(0).getName());
-        Assert.assertEquals(1, e.getDependencyHierarchy().get(2).size());
+        val e = dataFlow.getExecutionGraph();
+        assertEquals(3, e.getDependencyHierarchy().size());
+        assertEquals("BuilderA", e.getDependencyHierarchy().get(0).get(0).getName());
+        assertEquals(1, e.getDependencyHierarchy().get(0).size());
+        assertEquals("BuilderB", e.getDependencyHierarchy().get(1).get(0).getName());
+        assertEquals(1, e.getDependencyHierarchy().get(1).size());
+        assertEquals("BuilderC", e.getDependencyHierarchy().get(2).get(0).getName());
+        assertEquals(1, e.getDependencyHierarchy().get(2).size());
     }
 
     @Test
-    public void testGenerateInterdependentStepConflict() throws Exception  {
+    public void testGenerateInterdependentStepConflict() throws Exception {
         try {
-            DataFlow dataFlow = new DataFlowBuilder()
+            new DataFlowBuilder()
                     .withMetaDataManager(dataBuilderMetadataManager)
                     .withName("test")
                     .withTargetData("G")
                     .build();
-        } catch (DataBuilderFrameworkException e) {
-            if(DataBuilderFrameworkException.ErrorCode.BUILDER_RESOLUTION_CONFLICT_FOR_DATA == e.getErrorCode()) {
-                return;
-            }
+        }
+        catch (DataBuilderFrameworkException e) {
+            assertEquals(DataBuilderFrameworkException.ErrorCode.BUILDER_RESOLUTION_CONFLICT_FOR_DATA,
+                         e.getErrorCode());
+            return;
         }
         fail("A conflict should have come here");
     }
 
     @Test
-    public void testGenerateInterdependentStepConflictNoData() throws Exception  {
-        DataFlow dataFlow = new DataFlow();
-        dataFlow.setName("test");
-        dataFlow.setTargetData("G");
-        dataFlow.setResolutionSpecs(Collections.singletonMap("G", "aa"));
+    public void testGenerateInterdependentStepConflictNoData() throws Exception {
+        val dataFlow = new DataFlow()
+                .setName("test")
+                .setTargetData("G")
+                .setResolutionSpecs(Collections.singletonMap("G", "aa"));
         try {
-            ExecutionGraph e = executionGraphGenerator.generateGraph(dataFlow);
-        } catch (DataBuilderFrameworkException e) {
-            if(DataBuilderFrameworkException.ErrorCode.NO_BUILDER_FOR_DATA == e.getErrorCode()) {
-                return;
-            }
+            executionGraphGenerator.generateGraph(dataFlow);
+        }
+        catch (DataBuilderFrameworkException e) {
+            assertEquals(DataBuilderFrameworkException.ErrorCode.NO_BUILDER_FOR_DATA, e.getErrorCode());
+            return;
         }
         fail("A conflict should have come here");
     }
+
     @Test
-    public void testGenerateInterdependentStepWithResolution() throws Exception  {
-        final DataFlow dataFlow = new DataFlowBuilder()
+    public void testGenerateInterdependentStepWithResolution() throws Exception {
+        val dataFlow = new DataFlowBuilder()
                 .withMetaDataManager(dataBuilderMetadataManager)
                 .withName("test")
                 .withTargetData("G")
                 .withResolutionSpec("G", "BuilderE")
                 .build();
-        ExecutionGraph e = dataFlow.getExecutionGraph();
-        Assert.assertEquals(3, e.getDependencyHierarchy().size());
-        Assert.assertEquals("BuilderA", e.getDependencyHierarchy().get(0).get(0).getName());
-        Assert.assertEquals(1, e.getDependencyHierarchy().get(0).size());
-        Assert.assertEquals("BuilderB", e.getDependencyHierarchy().get(1).get(0).getName());
-        Assert.assertEquals(1, e.getDependencyHierarchy().get(1).size());
-        Assert.assertEquals("BuilderE", e.getDependencyHierarchy().get(2).get(0).getName());
-        Assert.assertEquals(1, e.getDependencyHierarchy().get(2).size());
+        val e = dataFlow.getExecutionGraph();
+        assertEquals(3, e.getDependencyHierarchy().size());
+        assertEquals("BuilderA", e.getDependencyHierarchy().get(0).get(0).getName());
+        assertEquals(1, e.getDependencyHierarchy().get(0).size());
+        assertEquals("BuilderB", e.getDependencyHierarchy().get(1).get(0).getName());
+        assertEquals(1, e.getDependencyHierarchy().get(1).size());
+        assertEquals("BuilderE", e.getDependencyHierarchy().get(2).get(0).getName());
+        assertEquals(1, e.getDependencyHierarchy().get(2).size());
 
     }
+
     @Test
-    public void testGenerateInterdependentStepWithResolutionAlt() throws Exception  {
-        final DataFlow dataFlow = new DataFlowBuilder()
-                                    .withMetaDataManager(dataBuilderMetadataManager)
-                                    .withName("test")
-                                    .withTargetData("G")
-                                    .withResolutionSpec("G", "BuilderD")
-                                    .build();
-        ExecutionGraph e = dataFlow.getExecutionGraph();
+    public void testGenerateInterdependentStepWithResolutionAlt() throws Exception {
+        val dataFlow = new DataFlowBuilder()
+                .withMetaDataManager(dataBuilderMetadataManager)
+                .withName("test")
+                .withTargetData("G")
+                .withResolutionSpec("G", "BuilderD")
+                .build();
+        val e = dataFlow.getExecutionGraph();
         log.info("{}", new ObjectMapper().writeValueAsString(e));
-        Assert.assertEquals(4, e.getDependencyHierarchy().size());
-        Assert.assertEquals("BuilderA", e.getDependencyHierarchy().get(0).get(0).getName());
-        Assert.assertEquals(1, e.getDependencyHierarchy().get(0).size());
-        Assert.assertEquals("BuilderB", e.getDependencyHierarchy().get(1).get(0).getName());
-        Assert.assertEquals(1, e.getDependencyHierarchy().get(1).size());
-        Assert.assertEquals("BuilderC", e.getDependencyHierarchy().get(2).get(0).getName());
-        Assert.assertEquals(1, e.getDependencyHierarchy().get(2).size());
-        Assert.assertEquals("BuilderD", e.getDependencyHierarchy().get(3).get(0).getName());
+        assertEquals(4, e.getDependencyHierarchy().size());
+        assertEquals("BuilderA", e.getDependencyHierarchy().get(0).get(0).getName());
+        assertEquals(1, e.getDependencyHierarchy().get(0).size());
+        assertEquals("BuilderB", e.getDependencyHierarchy().get(1).get(0).getName());
+        assertEquals(1, e.getDependencyHierarchy().get(1).size());
+        assertEquals("BuilderC", e.getDependencyHierarchy().get(2).get(0).getName());
+        assertEquals(1, e.getDependencyHierarchy().get(2).size());
+        assertEquals("BuilderD", e.getDependencyHierarchy().get(3).get(0).getName());
 
     }
 

@@ -1,0 +1,150 @@
+{
+  "dependencyHierarchy" : [ [ {
+    "consumes" : [ "A" ],
+    "produces" : "A1",
+    "name" : "BuilderA1",
+    "rank" : 9,
+    "optionals" : [ ],
+    "access" : [ ]
+  } ], [ {
+    "consumes" : [ "A", "A1" ],
+    "produces" : "B1",
+    "name" : "BuilderB1",
+    "rank" : 8,
+    "optionals" : [ ],
+    "access" : [ ]
+  }, {
+    "consumes" : [ "A", "A1" ],
+    "produces" : "B2",
+    "name" : "BuilderB2",
+    "rank" : 8,
+    "optionals" : [ ],
+    "access" : [ ]
+  }, {
+    "consumes" : [ "A", "A1" ],
+    "produces" : "B3",
+    "name" : "BuilderB3",
+    "rank" : 8,
+    "optionals" : [ ],
+    "access" : [ ]
+  }, {
+    "consumes" : [ "A" ],
+    "produces" : "A2",
+    "name" : "BuilderA2",
+    "rank" : 8,
+    "optionals" : [ ],
+    "access" : [ ]
+  }, {
+    "consumes" : [ "A", "A1" ],
+    "produces" : "B4",
+    "name" : "BuilderB4",
+    "rank" : 8,
+    "optionals" : [ ],
+    "access" : [ ]
+  }, {
+    "consumes" : [ "A", "A1" ],
+    "produces" : "B5",
+    "name" : "BuilderB5",
+    "rank" : 8,
+    "optionals" : [ ],
+    "access" : [ ]
+  } ], [ {
+    "consumes" : [ "A" ],
+    "produces" : "C",
+    "name" : "BuilderC",
+    "rank" : 7,
+    "optionals" : [ "A1", "A2", "B1", "B2", "B3", "B4", "B5" ],
+    "access" : [ ]
+  } ], [ {
+    "consumes" : [ "A", "C" ],
+    "produces" : "D",
+    "name" : "BuilderD",
+    "rank" : 6,
+    "optionals" : [ ],
+    "access" : [ ]
+  } ], [ {
+    "consumes" : [ "D" ],
+    "produces" : "E1",
+    "name" : "BuilderE1",
+    "rank" : 5,
+    "optionals" : [ ],
+    "access" : [ "A", "C" ]
+  } ], [ {
+    "consumes" : [ "E1" ],
+    "produces" : "F",
+    "name" : "BuilderF",
+    "rank" : 4,
+    "optionals" : [ ],
+    "access" : [ "A", "C", "D" ]
+  } ], [ {
+    "consumes" : [ "F" ],
+    "produces" : "G",
+    "name" : "BuilderG",
+    "rank" : 3,
+    "optionals" : [ ],
+    "access" : [ "C", "D", "E1" ]
+  }, {
+    "consumes" : [ "D" ],
+    "produces" : "E2",
+    "name" : "BuilderE2",
+    "rank" : 3,
+    "optionals" : [ ],
+    "access" : [ "A", "C" ]
+  }, {
+    "consumes" : [ "D" ],
+    "produces" : "E3",
+    "name" : "BuilderE3",
+    "rank" : 3,
+    "optionals" : [ ],
+    "access" : [ "A", "C" ]
+  }, {
+    "consumes" : [ "D" ],
+    "produces" : "E4",
+    "name" : "BuilderE4",
+    "rank" : 3,
+    "optionals" : [ ],
+    "access" : [ "A", "C" ]
+  }, {
+    "consumes" : [ "D" ],
+    "produces" : "E5",
+    "name" : "BuilderE5",
+    "rank" : 3,
+    "optionals" : [ ],
+    "access" : [ "A", "C" ]
+  }, {
+    "consumes" : [ "D", "IE6" ],
+    "produces" : "E6",
+    "name" : "BuilderE6",
+    "rank" : 3,
+    "optionals" : [ ],
+    "access" : [ "A", "C" ]
+  }, {
+    "consumes" : [ "A", "IA" ],
+    "produces" : "A3",
+    "name" : "BuilderA3",
+    "rank" : 3,
+    "optionals" : [ ],
+    "access" : [ ]
+  } ], [ {
+    "consumes" : [ "C", "A3" ],
+    "produces" : "I",
+    "name" : "BuilderI",
+    "rank" : 2,
+    "optionals" : [ "E2", "E3", "E4", "E5", "E6", "F", "G", "IE6" ],
+    "access" : [ "A" ]
+  } ], [ {
+    "consumes" : [ "I" ],
+    "produces" : "J",
+    "name" : "BuilderJ",
+    "rank" : 1,
+    "optionals" : [ ],
+    "access" : [ "A", "E2", "E3", "E4", "E5", "E6", "F", "G", "IE6", "J" ]
+  } ], [ {
+    "consumes" : [ "J" ],
+    "produces" : "K",
+    "name" : "BuilderK",
+    "rank" : 0,
+    "optionals" : [ ],
+    "access" : [ "A", "C" ]
+  } ] ]
+}

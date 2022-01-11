@@ -6,10 +6,10 @@ import io.appform.databuilderframework.cmplxscenariotest.data.DataA3;
 import io.appform.databuilderframework.engine.DataBuilder;
 import io.appform.databuilderframework.engine.DataBuilderContext;
 import io.appform.databuilderframework.engine.DataBuilderException;
-import io.appform.databuilderframework.engine.DataSetAccessor;
 import io.appform.databuilderframework.engine.DataValidationException;
 import io.appform.databuilderframework.model.Data;
 import io.appform.databuilderframework.model.DataSet;
+import lombok.val;
 
 @DataBuilderInfo(name = "BuilderA3", consumes = {"A","IA"}, produces = "A3")
 public class BuilderA3 extends DataBuilder{
@@ -17,7 +17,7 @@ public class BuilderA3 extends DataBuilder{
 	@Override
 	public Data process(DataBuilderContext context)
 			throws DataBuilderException, DataValidationException {
-		DataSetAccessor dataSetAccessor = DataSet.accessor(context.getDataSet());
+		val dataSetAccessor = DataSet.accessor(context.getDataSet());
 		ThreadUtils.INSTANCE.putToSleep(20, "A3");
 		return new DataA3();
 	}

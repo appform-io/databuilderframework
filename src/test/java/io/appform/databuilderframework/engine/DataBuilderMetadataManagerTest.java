@@ -1,17 +1,20 @@
 package io.appform.databuilderframework.engine;
 
-import io.appform.databuilderframework.complextest.SB;
 import com.google.common.collect.ImmutableSet;
-import org.junit.Assert;
+import io.appform.databuilderframework.complextest.SB;
+import lombok.val;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class DataBuilderMetadataManagerTest {
 
     @Test
     public void testGetConsumesSetFor() throws Exception {
-        DataBuilderMetadataManager manager = new DataBuilderMetadataManager();
-        Assert.assertEquals(null, manager.getConsumesSetFor("A"));
+        val manager = new DataBuilderMetadataManager();
+        assertNull(manager.getConsumesSetFor("A"));
         manager.register(ImmutableSet.of("CR", "CAID", "VAS"), "OO", "SB", SB.class);
-        Assert.assertEquals(1, manager.getConsumesSetFor("CR").size());
+        assertEquals(1, manager.getConsumesSetFor("CR").size());
     }
 }

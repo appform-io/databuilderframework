@@ -1,28 +1,20 @@
 package examples.bloghomepagebuilder.data;
 
 import io.appform.databuilderframework.model.DataAdapter;
+import lombok.EqualsAndHashCode;
+import lombok.Value;
 
+@Value
+@EqualsAndHashCode(callSuper = true)
 public class HomePageRequest extends DataAdapter<HomePageRequest>{
-    private final String requestAuthToken;
-    private final String userAuthToken;
-    private byte[] body;
+    String requestAuthToken;
+    String userAuthToken;
+    byte[] body;
 
     public HomePageRequest(String authToken, String userAuthToken, byte[] body) {
         super(HomePageRequest.class);
         this.requestAuthToken = authToken;
         this.userAuthToken = userAuthToken;
         this.body = body;
-    }
-
-    public String getRequestAuthToken() {
-        return requestAuthToken;
-    }
-
-    public String getUserAuthToken() {
-        return userAuthToken;
-    }
-
-    public byte[] getBody() {
-        return body;
     }
 }

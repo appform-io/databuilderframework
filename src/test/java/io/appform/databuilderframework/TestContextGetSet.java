@@ -1,5 +1,6 @@
 package io.appform.databuilderframework;
 
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import io.appform.databuilderframework.engine.DataBuilderContext;
 import org.junit.Assert;
 import org.junit.Test;
@@ -72,8 +73,9 @@ public class TestContextGetSet {
     public void testNullKey() {
         try {
             new DataBuilderContext().saveContextData(null, new TestClass("XX", 1));
-        } catch (RuntimeException e) {
-            Assert.assertEquals("Invalid key for context data. Key cannot be null/empty", e.getMessage());
+        } catch (UncheckedExecutionException e) {
+            Assert.assertEquals(IllegalArgumentException.class, e.getCause().getClass());
+            Assert.assertEquals("java.lang.IllegalArgumentException: Invalid key for context data. Key cannot be null/empty", e.getMessage());
             return;
         }
         fail("Expected exception was not raised");

@@ -1,12 +1,12 @@
 package examples.bloghomepagebuilder.builders;
 
+import examples.bloghomepagebuilder.data.*;
 import io.appform.databuilderframework.annotations.DataBuilderClassInfo;
 import io.appform.databuilderframework.engine.DataBuilder;
 import io.appform.databuilderframework.engine.DataBuilderContext;
 import io.appform.databuilderframework.engine.DataBuilderException;
-import io.appform.databuilderframework.engine.DataSetAccessor;
 import io.appform.databuilderframework.model.Data;
-import examples.bloghomepagebuilder.data.*;
+import lombok.val;
 
 @DataBuilderClassInfo(produces = HomePageResponse.class, consumes = {UserDetails.class, BlogPost.class, PostList.class, FollowerList.class, RecommendedTags.class})
 public class HomePageBuilder extends DataBuilder {
@@ -17,7 +17,7 @@ public class HomePageBuilder extends DataBuilder {
 
     @Override
     public Data process(DataBuilderContext context) throws DataBuilderException {
-        final DataSetAccessor dataSetAccessor = context.getDataSet().accessor();
+        val dataSetAccessor = context.getDataSet().accessor();
         return new HomePageResponse(
                         dataSetAccessor.get(UserDetails.class).getUserName(),
                         dataSetAccessor.get(BlogPost.class).getTitle(),

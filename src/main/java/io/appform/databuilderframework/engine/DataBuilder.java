@@ -11,6 +11,7 @@ import io.appform.databuilderframework.model.DataBuilderMeta;
  * {@link io.appform.databuilderframework.annotations.DataBuilderInfo}
  * will be made available and databuilders in the system.
  */
+@lombok.Data
 @JsonTypeInfo(use= JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "name")
 public abstract class DataBuilder {
 
@@ -42,13 +43,5 @@ public abstract class DataBuilder {
      * @throws io.appform.databuilderframework.engine.DataBuilderException in case any downstream system or itself errors out.
      * (This is generic, as the upper layers need to be prepared for it).
      */
-    abstract public Data process(final DataBuilderContext context) throws DataBuilderException,DataValidationException;
-
-    public DataBuilderMeta getDataBuilderMeta() {
-        return dataBuilderMeta;
-    }
-
-    public void setDataBuilderMeta(DataBuilderMeta dataBuilderMeta) {
-        this.dataBuilderMeta = dataBuilderMeta;
-    }
+    public abstract Data process(final DataBuilderContext context) throws DataBuilderException,DataValidationException;
 }

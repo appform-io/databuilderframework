@@ -1,13 +1,19 @@
 package io.appform.databuilderframework.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Predicates;
+import com.google.common.base.Strings;
+import com.google.common.collect.Maps;
 import io.appform.databuilderframework.engine.DataSetAccessor;
 import io.appform.databuilderframework.engine.Utils;
-import com.google.common.collect.Maps;
+import lombok.val;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.StampedLock;
+import java.util.function.Supplier;
 
 /**
  * Working set for data
@@ -20,10 +26,12 @@ public class DataSet {
     @NotNull
     @NotEmpty
     @JsonProperty
-    private Map<String,Data> availableData;
+    private final Map<String, Data> availableData;
+
+    private final StampedLock lock = new StampedLock();
 
     public DataSet() {
-        this.availableData = Maps.newHashMap();
+        this.availableData = new ConcurrentHashMap<>();
     }
 
     public DataSet(Map<String, Data> availableData) {
@@ -31,21 +39,66 @@ public class DataSet {
     }
 
     public DataSet add(String dataName, Data data) {
-        this.availableData.put(dataName, data);
-        return this;
+        val stamp = lock.writeLock();
+        try {
+            this.availableData.put(dataName, data);
+            return this;
+        }
+        finally {
+            lock.unlockWrite(stamp);
+        }
     }
 
-    public<T extends Data> DataSet add(T data) {
-        this.availableData.put(Utils.name(data.getClass()), data);
-        return this;
+    public DataSet add(final Collection<Data> data) {
+        val stamp = lock.writeLock();
+        try {
+            data.forEach(d -> availableData.put(d.getData(), d));
+            return this;
+        }
+        finally {
+            lock.unlockWrite(stamp);
+        }
     }
 
-    public Map<String, Data> getAvailableData() {
-        return availableData;
+    public <T extends Data> DataSet add(T data) {
+        return add(Utils.name(data.getClass()), data);
     }
 
-    public void setAvailableData(Map<String, Data> availableData) {
-        this.availableData = availableData;
+    public Map<String, Data> filter(final Collection<String> requiredKeys) {
+        if (null == requiredKeys || requiredKeys.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        return safeOp(() -> Maps.filterKeys(Utils.sanitize(availableData), Predicates.in(requiredKeys)));
+    }
+
+    public Data get(final String name) {
+        if (Strings.isNullOrEmpty(name)) {
+            return null;
+        }
+        return safeOp(() -> availableData.get(name));
+    }
+
+    public boolean containsAll(final Collection<String> requiredKeys) {
+        if (null == requiredKeys || requiredKeys.isEmpty()) {
+            return false;
+        }
+        return safeOp(() -> availableData.keySet().containsAll(requiredKeys));
+    }
+
+    public void copyInto(final Map<String, Data> outMap, Collection<String> excludedKeys) {
+        if (null == outMap) {
+            return;
+        }
+        safeOp(() -> {
+            if (null != excludedKeys && !excludedKeys.isEmpty()) {
+                outMap.putAll(Maps.filterKeys(availableData, Predicates.not(Predicates.in(excludedKeys))));
+            }
+            else {
+                outMap.putAll(availableData);
+            }
+            return null;
+        });
+
     }
 
     public static DataSetAccessor accessor(DataSet dataSet) {
@@ -53,6 +106,16 @@ public class DataSet {
     }
 
     public DataSetAccessor accessor() {
-        return new DataSetAccessor(this);
+        return accessor(this);
+    }
+
+    private <T> T safeOp(Supplier<T> operation) {
+        val stamp = lock.readLock();
+        try {
+            return operation.get();
+        }
+        finally {
+            lock.unlockRead(stamp);
+        }
     }
 }

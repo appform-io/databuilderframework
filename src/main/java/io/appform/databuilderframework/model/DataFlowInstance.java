@@ -1,6 +1,7 @@
 package io.appform.databuilderframework.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
@@ -10,6 +11,7 @@ import javax.validation.constraints.NotNull;
  * This class represents a running instance of the flow. It contains the flow itself as well as the
  * {@link io.appform.databuilderframework.model.DataSet} required for execution.
  */
+@Data
 public class DataFlowInstance {
 
     /**
@@ -44,29 +46,5 @@ public class DataFlowInstance {
 
     public DataFlowInstance(String id, DataFlow dataFlow) {
         this(id, dataFlow, new DataSet());
-    }
-
-    public DataFlow getDataFlow() {
-        return dataFlow;
-    }
-
-    public void setDataFlow(DataFlow dataFlow) {
-        this.dataFlow = dataFlow;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public DataSet getDataSet() {
-        return dataSet;
-    }
-
-    public void setDataSet(DataSet dataSet) {
-        this.dataSet = dataSet;
     }
 }

@@ -1,69 +1,59 @@
 package io.appform.databuilderframework.engine;
 
 import io.appform.databuilderframework.model.DataExecutionResponse;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+import lombok.Value;
 
+import java.util.Collections;
 import java.util.Map;
 
 /**
  * Created by kaustav.das on 26/03/15.
  */
+@Value
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public class DataValidationException extends Exception {
-    private Map<String,Object> details;
-    private DataExecutionResponse response;
     public enum ErrorCode {
         DATA_VALIDATION_EXCEPTION
     }
 
-    private final ErrorCode errorCode;
+    ErrorCode errorCode;
+    Map<String, Object> details;
+    DataExecutionResponse response;
+
 
 
     public DataValidationException(String message) {
-        super(message);
-        this.errorCode = ErrorCode.DATA_VALIDATION_EXCEPTION;
+        this(ErrorCode.DATA_VALIDATION_EXCEPTION, message);
     }
 
     public DataValidationException(ErrorCode errorCode, String message) {
-        super(message);
-        this.errorCode = errorCode;
+        this(errorCode, message, Collections.emptyMap());
     }
 
     public DataValidationException(ErrorCode errorCode, String message, Throwable cause) {
-        super(message, cause);
-        this.errorCode = errorCode;
+        this(errorCode, message, Collections.emptyMap(), cause);
     }
 
     public DataValidationException(ErrorCode errorCode, String message, Map<String, Object> details) {
-        super(message);
-        this.details=details;
-        this.errorCode = errorCode;
+        this(errorCode, message, details, null);
     }
 
     public DataValidationException(ErrorCode errorCode, String message, Map<String, Object> details, Throwable cause) {
+        this(errorCode, message, null, details, cause);
+    }
+
+    public DataValidationException(
+            ErrorCode errorCode,
+            String message,
+            DataExecutionResponse response,
+            Map<String, Object> details,
+            Throwable cause) {
         super(message, cause);
-        this.details=details;
+        this.details = details;
         this.errorCode = errorCode;
-    }
-
-    public DataValidationException(ErrorCode errorCode, String message, DataExecutionResponse response, Map<String, Object> details, Throwable cause) {
-        super(message, cause);
-        this.details=details;
-        this.errorCode = errorCode;
-        this.response = response;
-    }
-
-    public Map<String, Object> getDetails() {
-        return details;
-    }
-
-    public ErrorCode getErrorCode() {
-        return errorCode;
-    }
-
-    public DataExecutionResponse getResponse() {
-        return response;
-    }
-
-    public void setResponse(DataExecutionResponse response) {
         this.response = response;
     }
 }

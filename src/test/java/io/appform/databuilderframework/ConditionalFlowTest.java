@@ -1,20 +1,28 @@
 package io.appform.databuilderframework;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import io.appform.databuilderframework.engine.*;
 import io.appform.databuilderframework.engine.impl.InstantiatingDataBuilderFactory;
 import io.appform.databuilderframework.model.*;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
-import org.junit.Assert;
-import org.junit.Before;
+import lombok.val;
 import org.junit.Test;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 public class ConditionalFlowTest {
-    private DataBuilderMetadataManager dataBuilderMetadataManager = new DataBuilderMetadataManager();
-    private DataFlowExecutor executor = new SimpleDataFlowExecutor(new InstantiatingDataBuilderFactory(dataBuilderMetadataManager));
-    private ExecutionGraphGenerator executionGraphGenerator = new ExecutionGraphGenerator(dataBuilderMetadataManager);
-    private DataFlow dataFlow;
-    private DataFlow dataFlowError = new DataFlow();
+    private final DataBuilderMetadataManager dataBuilderMetadataManager = new DataBuilderMetadataManager()
+            .register(ImmutableSet.of("A", "B"), "C", "BuilderA", TestBuilderA.class )
+            .register(ImmutableSet.of("C", "D"), "E", "BuilderB", ConditionalBuilder.class )
+            .register(ImmutableSet.of("A", "E"), "F", "BuilderC", TestBuilderC.class );
+
+    private final DataFlowExecutor executor = new SimpleDataFlowExecutor(new InstantiatingDataBuilderFactory(dataBuilderMetadataManager));
+
+    private final DataFlow dataFlow= new DataFlowBuilder()
+            .withMetaDataManager(dataBuilderMetadataManager)
+            .withTargetData("F")
+            .build();
 
     public static final class ConditionalBuilder extends DataBuilder {
 
@@ -31,70 +39,52 @@ public class ConditionalFlowTest {
         }
     }
 
-    @Before
-    public void setup() throws Exception {
-        dataBuilderMetadataManager.register(ImmutableSet.of("A", "B"), "C", "BuilderA", TestBuilderA.class );
-        dataBuilderMetadataManager.register(ImmutableSet.of("C", "D"), "E", "BuilderB", ConditionalBuilder.class );
-        dataBuilderMetadataManager.register(ImmutableSet.of("A", "E"), "F", "BuilderC", TestBuilderC.class );
-
-        dataFlow = new DataFlowBuilder()
-                        .withMetaDataManager(dataBuilderMetadataManager)
-                        .withTargetData("F")
-                        .build();
-
-        dataFlowError = new DataFlowBuilder()
-                        .withMetaDataManager(dataBuilderMetadataManager)
-                        .withTargetData("Y")
-                        .build();
-
-    }
-
     @Test
     public void testRunStop() throws Exception {
-        DataFlowInstance dataFlowInstance = new DataFlowInstance();
-        dataFlowInstance.setId("testflow");
-        dataFlowInstance.setDataFlow(dataFlow);
+        val dataFlowInstance = new DataFlowInstance()
+                .setId("testflow")
+                .setDataFlow(dataFlow);
         {
-            DataDelta dataDelta = new DataDelta(Lists.<Data>newArrayList(new TestDataA("Hello")));
-            DataExecutionResponse response = executor.run(dataFlowInstance, dataDelta);
-            Assert.assertTrue(response.getResponses().isEmpty());
+            val dataDelta = new DataDelta(Lists.<Data>newArrayList(new TestDataA("Hello")));
+            val response = executor.run(dataFlowInstance, dataDelta);
+            assertTrue(response.getResponses().isEmpty());
         }
         {
-            DataDelta dataDelta = new DataDelta(Lists.<Data>newArrayList(new TestDataB("Bhai")));
-            DataExecutionResponse response = executor.run(dataFlowInstance, dataDelta);
-            Assert.assertFalse(response.getResponses().isEmpty());
-            Assert.assertTrue(response.getResponses().containsKey("C"));
+            val dataDelta = new DataDelta(Lists.<Data>newArrayList(new TestDataB("Bhai")));
+            val response = executor.run(dataFlowInstance, dataDelta);
+            assertFalse(response.getResponses().isEmpty());
+            assertTrue(response.getResponses().containsKey("C"));
         }
         {
-            DataDelta dataDelta = new DataDelta(Lists.<Data>newArrayList(new TestDataD("this")));
-            DataExecutionResponse response = executor.run(dataFlowInstance, dataDelta);
-            Assert.assertTrue(response.getResponses().isEmpty());
+            val dataDelta = new DataDelta(Lists.<Data>newArrayList(new TestDataD("this")));
+            val response = executor.run(dataFlowInstance, dataDelta);
+            assertTrue(response.getResponses().isEmpty());
         }
 
     }
 
     @Test
     public void testRun() throws Exception {
-        DataFlowInstance dataFlowInstance = new DataFlowInstance();
-        dataFlowInstance.setId("testflow");
-        dataFlowInstance.setDataFlow(dataFlow);
+        val dataFlowInstance = new DataFlowInstance()
+                .setId("testflow")
+                .setDataFlow(dataFlow);
         {
-            DataDelta dataDelta = new DataDelta(Lists.<Data>newArrayList(new TestDataA("Hello")));
-            DataExecutionResponse response = executor.run(dataFlowInstance, dataDelta);
-            Assert.assertTrue(response.getResponses().isEmpty());
+            val dataDelta = new DataDelta(Lists.<Data>newArrayList(new TestDataA("Hello")));
+            val response = executor.run(dataFlowInstance, dataDelta);
+            assertTrue(response.getResponses().isEmpty());
         }
         {
-            DataDelta dataDelta = new DataDelta(Lists.<Data>newArrayList(new TestDataB("World")));
-            DataExecutionResponse response = executor.run(dataFlowInstance, dataDelta);
-            Assert.assertFalse(response.getResponses().isEmpty());
-            Assert.assertTrue(response.getResponses().containsKey("C"));
+            val dataDelta = new DataDelta(Lists.<Data>newArrayList(new TestDataB("World")));
+            val response = executor.run(dataFlowInstance, dataDelta);
+            assertFalse(response.getResponses().isEmpty());
+            assertTrue(response.getResponses().containsKey("C"));
         }
         {
-            DataDelta dataDelta = new DataDelta(Lists.<Data>newArrayList(new TestDataD("this")));
-            DataExecutionResponse response = executor.run(dataFlowInstance, dataDelta);
-            Assert.assertFalse(response.getResponses().isEmpty());
-            Assert.assertTrue(response.getResponses().containsKey("E"));
-            Assert.assertTrue(response.getResponses().containsKey("F"));
+            val dataDelta = new DataDelta(Lists.<Data>newArrayList(new TestDataD("this")));
+            val response = executor.run(dataFlowInstance, dataDelta);
+            assertFalse(response.getResponses().isEmpty());
+            assertTrue(response.getResponses().containsKey("E"));
+            assertTrue(response.getResponses().containsKey("F"));
         }
 
     }

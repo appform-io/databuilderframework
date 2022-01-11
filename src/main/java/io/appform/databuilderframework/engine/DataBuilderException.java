@@ -1,52 +1,47 @@
 package io.appform.databuilderframework.engine;
 
 
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+import lombok.Value;
+
+import java.util.Collections;
 import java.util.Map;
 
 /**
  * Created by ajaysingh on 13/06/14.
  */
-public class DataBuilderException extends Exception{
-    private Map<String,Object> details;
+@Value
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
+public class DataBuilderException extends Exception {
     public enum ErrorCode {
         HANDLER_FAILURE
     }
 
-    private final ErrorCode errorCode;
+    ErrorCode errorCode;
+    Map<String, Object> details;
 
 
     public DataBuilderException(String message) {
-        super(message);
-        this.errorCode = ErrorCode.HANDLER_FAILURE;
+        this(ErrorCode.HANDLER_FAILURE, message);
     }
 
     public DataBuilderException(ErrorCode errorCode, String message) {
-        super(message);
-        this.errorCode = errorCode;
+        this(errorCode, message, Collections.emptyMap());
     }
 
     public DataBuilderException(ErrorCode errorCode, String message, Throwable cause) {
-        super(message, cause);
-        this.errorCode = errorCode;
+        this(errorCode, message, Collections.emptyMap(), cause);
     }
 
     public DataBuilderException(ErrorCode errorCode, String message, Map<String, Object> details) {
-        super(message);
-        this.details=details;
-        this.errorCode = errorCode;
+        this(errorCode, message, details, null);
     }
 
     public DataBuilderException(ErrorCode errorCode, String message, Map<String, Object> details, Throwable cause) {
         super(message, cause);
-        this.details=details;
+        this.details = details;
         this.errorCode = errorCode;
-    }
-
-    public Map<String, Object> getDetails() {
-        return details;
-    }
-
-    public ErrorCode getErrorCode() {
-        return errorCode;
     }
 }
