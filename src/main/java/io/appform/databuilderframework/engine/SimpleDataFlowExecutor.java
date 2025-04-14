@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.Supplier;
 
 /**
  * The executor for a {@link io.appform.databuilderframework.model.DataFlow}.
@@ -80,10 +81,9 @@ public class SimpleDataFlowExecutor extends DataFlowExecutor {
                                         dataSet.accessor().getAccesibleDataSetFor(builder)));
                         if (null != response) {
                             Preconditions.checkArgument(response.getData().equalsIgnoreCase(builderMeta.getProduces()),
-                                                        String.format(
-                                                                "Builder is supposed to produce %s but produces %s",
-                                                                builderMeta.getProduces(),
-                                                                response.getData()));
+                                            "Builder is supposed to produce %s but produces %s",
+                                            builderMeta.getProduces(),
+                                            response.getData());
                             dataSetAccessor.merge(response);
                             responseData.put(response.getData(), response);
                             response.setGeneratedBy(builderMeta.getName());
