@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import lombok.Builder;
+import lombok.Getter;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
@@ -45,8 +46,8 @@ public class DataBuilderMeta implements Comparable<DataBuilderMeta>, Serializabl
     private String name;
 
     private int rank;
-    
-    
+
+
     /**
      * Set of {@link io.appform.databuilderframework.model.Data} this {@link io.appform.databuilderframework.engine.DataBuilder}
      * can consume optionally, i.e. this {@link io.appform.databuilderframework.model.Data}
@@ -65,21 +66,25 @@ public class DataBuilderMeta implements Comparable<DataBuilderMeta>, Serializabl
     @JsonProperty
     private Set<String> access;
 
+    @Getter
+    private Set<String> accessibleDataSet;
+
     public DataBuilderMeta(Set<String> consumes, String produces, String name) {
         this(consumes, produces, name, Collections.emptySet(), Collections.emptySet());
     }
 
     @Builder
-    public DataBuilderMeta(Set<String> consumes, String produces, String name, 
+    public DataBuilderMeta(Set<String> consumes, String produces, String name,
     		Set<String> optionals, Set<String> access) {
         this.consumes = consumes;
         this.produces = produces;
         this.name = name;
         this.optionals = optionals;
         this.access = access;
+        this.accessibleDataSet = constructAccessibleDataSet();
     }
 
-    
+
     public DataBuilderMeta() {
     }
 
@@ -91,9 +96,9 @@ public class DataBuilderMeta implements Comparable<DataBuilderMeta>, Serializabl
     		return consumes;
     	}
     }
-    
+
     @JsonIgnore
-    public Set<String> getAccessibleDataSet(){
+    private Set<String> constructAccessibleDataSet() {
     	Set<String> output = consumes;
     	if(optionals != null && !optionals.isEmpty()){
     		output = Sets.union(optionals, output);
@@ -103,7 +108,7 @@ public class DataBuilderMeta implements Comparable<DataBuilderMeta>, Serializabl
     	}
     	return output;
     }
-    
+
     public int compareTo(DataBuilderMeta rhs) {
         return name.compareTo(rhs.getName());
     }

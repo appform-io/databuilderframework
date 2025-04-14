@@ -34,34 +34,12 @@ public class DataBuilderContext {
     }
 
     /**
-     * Get only the accessible data for this builder.
-     *
-     * @param builder The builder that wants to access this data.
-     * @return A dataset that contains only the data accessible to the builder.
-     * @deprecated This method will be removed in the near future. Do not use this in newer projects.
-     * Reasoning: This is redundant given the set sent to a builder is already filtered
-     */
-    @Deprecated
-    public DataSet getDataSet(DataBuilder builder) {
-        Preconditions.checkNotNull(builder.getDataBuilderMeta(), "No metadata present in this builder");
-        val allowed = Utils.sanitize(builder.getDataBuilderMeta().getAccessibleDataSet());
-        if (allowed.isEmpty()) {
-            return new DataSet(Collections.emptyMap());
-        }
-        return new DataSet(dataSet.filter(allowed));
-    }
-
-    /**
      * Access the data set. Ideally a builder should only access data as declared.
      *
      * @return The full data set.
      */
     public DataSet getDataSet() {
         return dataSet;
-    }
-
-    public void setDataSet(DataSet dataSet) {
-        this.dataSet = dataSet;
     }
 
     /**

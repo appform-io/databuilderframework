@@ -42,8 +42,9 @@ public class MixedDataBuilderFactory implements DataBuilderFactory {
 
     public DataBuilder create(DataBuilderMeta dataBuilderMeta) throws DataBuilderFrameworkException {
         val builderName = dataBuilderMeta.getName();
-        if (builderInstances.containsKey(builderName)) {
-            return builderInstances.get(builderName);
+        val builderInstance = builderInstances.get(builderName);
+        if (builderInstance != null) {
+            return builderInstance;
         }
         val dataBuilderClass = dataBuilderMetadataManager.getDataBuilderClass(builderName);
         if (null == dataBuilderClass) {

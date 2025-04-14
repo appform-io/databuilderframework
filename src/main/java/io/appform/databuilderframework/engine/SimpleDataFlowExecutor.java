@@ -8,6 +8,7 @@ import lombok.val;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.Supplier;
@@ -38,12 +39,12 @@ public class SimpleDataFlowExecutor extends DataFlowExecutor {
             DataBuilderFactory builderFactory) throws DataBuilderFrameworkException, DataValidationException {
         val executionGraph = dataFlow.getExecutionGraph();
         val dataSet = dataFlowInstance.getDataSet().accessor().copy(); //Create own copy to work with
-        val dataSetAccessor = DataSet.accessor(dataSet);
-        val responseData = new TreeMap<String, Data>();
+        val dataSetAccessor = dataSet.accessor();
+        val responseData = new LinkedHashMap<String, Data>();
         val activeDataSet = new HashSet<String>();
         val dependencyHierarchy = executionGraph.getDependencyHierarchy();
         val newlyGeneratedData = new HashSet<String>();
-        val processedBuilders = Collections.synchronizedSet(new HashSet<DataBuilderMeta>());
+        val processedBuilders = new HashSet<DataBuilderMeta>();
 
         dataSetAccessor.merge(dataDelta);
         dataDelta.getDelta().forEach(data -> activeDataSet.add(data.getData()));

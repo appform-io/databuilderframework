@@ -64,13 +64,6 @@ public class DataSet {
         return add(Utils.name(data.getClass()), data);
     }
 
-    public Map<String, Data> filter(final Collection<String> requiredKeys) {
-        if (null == requiredKeys || requiredKeys.isEmpty()) {
-            return Collections.emptyMap();
-        }
-        return safeOpOptimistic(() -> Maps.filterKeys(Utils.sanitize(availableData), Predicates.in(requiredKeys)));
-    }
-
     public Data get(final String name) {
         if (Strings.isNullOrEmpty(name)) {
             return null;
@@ -117,12 +110,12 @@ public class DataSet {
     }
 
     private <T> T safeOp(Supplier<T> operation) {
-        val stamp = lock.readLock();
+//        val stamp = lock.readLock();
         try {
             return operation.get();
         }
         finally {
-            lock.unlockRead(stamp);
+//            lock.unlockRead(stamp);
         }
     }
 
