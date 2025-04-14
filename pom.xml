@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <groupId>io.appform.databuilderframework</groupId>
-    <version>1.1.0</version>
+    <version>1.1.1-RC1</version>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>databuilderframework</artifactId>
@@ -68,6 +68,11 @@
             <name>Vinay Varma</name>
             <email>vinay.varma@flipkart.com</email>
         </developer>
+        <developer>
+            <id>r0goyal</id>
+            <name>Rishabh Goyal</name>
+            <email>rgoyal2191@gmail.com</email>
+        </developer>
     </developers>
 
     <ciManagement>
@@ -78,8 +83,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jackson.version>2.13.1</jackson.version>
-        <lombok.version>1.18.22</lombok.version>
-        <lombok.maven.version>1.16.6.1</lombok.maven.version>
+        <lombok.version>1.18.30</lombok.version>
         <hibernate.validator.version>5.2.5.Final</hibernate.validator.version>
         <junit.version>4.13.2</junit.version>
         <logback.version>1.2.10</logback.version>
@@ -137,21 +141,9 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.projectlombok</groupId>
-                <artifactId>lombok-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>delombok</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <version>${lombok.maven.version}</version>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
@@ -160,24 +152,23 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.6</version>
+                <version>0.8.13</version>
                 <executions>
                     <execution>
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
                     </execution>
-                    <!-- attached to Maven test phase -->
                     <execution>
                         <id>report</id>
-                        <phase>test</phase>
+                        <phase>verify</phase>
                         <goals>
                             <goal>report</goal>
                         </goals>
+                        <configuration>
+                        </configuration>
                     </execution>
                 </executions>
-                <configuration>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
