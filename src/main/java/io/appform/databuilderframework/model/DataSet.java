@@ -10,7 +10,9 @@ import lombok.val;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.StampedLock;
 import java.util.function.Supplier;
@@ -43,8 +45,7 @@ public class DataSet {
         try {
             this.availableData.put(dataName, data);
             return this;
-        }
-        finally {
+        } finally {
             lock.unlockWrite(stamp);
         }
     }
@@ -54,8 +55,7 @@ public class DataSet {
         try {
             data.forEach(d -> availableData.put(d.getData(), d));
             return this;
-        }
-        finally {
+        } finally {
             lock.unlockWrite(stamp);
         }
     }
@@ -68,21 +68,28 @@ public class DataSet {
         if (null == requiredKeys || requiredKeys.isEmpty()) {
             return Collections.emptyMap();
         }
-        return safeOp(() -> Maps.filterKeys(Utils.sanitize(availableData), Predicates.in(requiredKeys)));
+        return safeOpOptimistic(() -> Maps.filterKeys(Utils.sanitize(availableData), Predicates.in(requiredKeys)));
     }
 
     public Data get(final String name) {
         if (Strings.isNullOrEmpty(name)) {
             return null;
         }
-        return safeOp(() -> availableData.get(name));
+        return availableData.get(name);
     }
 
     public boolean containsAll(final Collection<String> requiredKeys) {
         if (null == requiredKeys || requiredKeys.isEmpty()) {
             return false;
         }
-        return safeOp(() -> availableData.keySet().containsAll(requiredKeys));
+        return safeOpOptimistic(() -> {
+            for (String data : requiredKeys) {
+                if (!availableData.containsKey(data)) {
+                    return false;
+                }
+            }
+            return true;
+        });
     }
 
     public void copyInto(final Map<String, Data> outMap, Collection<String> excludedKeys) {
@@ -116,6 +123,20 @@ public class DataSet {
         }
         finally {
             lock.unlockRead(stamp);
+        }
+    }
+
+    private <T> T safeOpOptimistic(Supplier<T> operation) {
+        val stamp = lock.tryOptimisticRead();
+        // This means a writeLock is already present, fallback to full readLock()
+        if (stamp == 0) {
+            return safeOp(operation);
+        }
+        T output = operation.get();
+        if (!lock.validate(stamp)) {
+            return safeOp(operation);
+        } else {
+            return output;
         }
     }
 }
