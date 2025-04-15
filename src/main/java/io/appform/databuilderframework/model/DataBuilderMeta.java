@@ -71,7 +71,7 @@ public class DataBuilderMeta implements Comparable<DataBuilderMeta>, Serializabl
 
     @Builder
     public DataBuilderMeta(Set<String> consumes, String produces, String name,
-                           Set<String> optionals, Set<String> access) {
+    		Set<String> optionals, Set<String> access) {
         this.consumes = consumes;
         this.produces = produces;
         this.name = name;
@@ -85,23 +85,23 @@ public class DataBuilderMeta implements Comparable<DataBuilderMeta>, Serializabl
 
     @JsonIgnore
     public Set<String> getEffectiveConsumes(){
-        if(optionals != null && !optionals.isEmpty()){
-            return Sets.union(optionals, consumes);
-        }else{
-            return consumes;
-        }
+    	if(optionals != null && !optionals.isEmpty()){
+    		return Sets.union(optionals, consumes);
+    	}else{
+    		return consumes;
+    	}
     }
 
     @JsonIgnore
     public Set<String> getAccessibleDataSet(){
-        Set<String> output = consumes;
-        if(optionals != null && !optionals.isEmpty()){
-            output = Sets.union(optionals, output);
-        }
-        if(access != null && !access.isEmpty()){
-            output = Sets.union(access, output);
-        }
-        return output;
+    	Set<String> output = consumes;
+    	if(optionals != null && !optionals.isEmpty()){
+    		output = Sets.union(optionals, output);
+    	}
+    	if(access != null && !access.isEmpty()){
+    		output = Sets.union(access, output);
+    	}
+    	return output;
     }
 
     public int compareTo(DataBuilderMeta rhs) {
@@ -109,8 +109,8 @@ public class DataBuilderMeta implements Comparable<DataBuilderMeta>, Serializabl
     }
 
     public DataBuilderMeta deepCopy() {
-        Set<String> optionalCopy = (optionals != null) ? ImmutableSet.copyOf(optionals) : null;
-        Set<String> accessCopy = (access != null) ? ImmutableSet.copyOf(access) : null;
+    	Set<String> optionalCopy = (optionals != null) ? ImmutableSet.copyOf(optionals) : null;
+    	Set<String> accessCopy = (access != null) ? ImmutableSet.copyOf(access) : null;
         return new DataBuilderMeta(ImmutableSet.copyOf(consumes), produces, name, optionalCopy, accessCopy);
     }
 }
