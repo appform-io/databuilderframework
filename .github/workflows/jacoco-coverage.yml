@@ -27,13 +27,6 @@ jobs:
           java-version: 11 # Or your project's Java version
           distribution: temurin
 
-      - name: Cache Maven packages
-        uses: actions/cache@v1
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
-
       - name: Build and analyze
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
