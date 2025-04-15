@@ -1,0 +1,60 @@
+name: JaCoCo Coverage
+on:
+  pull_request:
+    branches: [ master ] # Adjust branches as needed
+
+permissions:
+  # Required for checking out the code
+  contents: read
+  # Required for posting comments and status checks
+  pull-requests: write
+  # Required for reading report files
+  actions: read # Optional, often implicitly available
+
+jobs:
+  build-and-report:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          java-version: 11 # Or your project's Java version
+          distribution: temurin
+
+      - name: Cache Maven packages
+        uses: actions/cache@v1
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Build and analyze
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: mvn -B verify
+
+      - name: Check for JaCoCo Report File
+        run: |
+          echo "Searching for JaCoCo reports..."
+          find ${{ github.workspace }} -name 'jacoco*.xml' # General search
+          echo "--- Listing Maven default ---"
+          ls -l ${{ github.workspace }}/target/site/jacoco/jacoco.xml || echo "Maven default not found"
+      # --- Coverage Reporting Step ---
+      - name: JaCoCo Report to PR Comment
+        id: jacoco
+        uses: madrapps/jacoco-report@v1.7.1 # Use the latest version
+        with:
+          paths: |
+            ${{ github.workspace }}/**/target/site/jacoco/jacoco.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-coverage-overall: 95 # Example value
+          min-coverage-changed-files: 95 # Example value
+          update-comment: true
+          title: "📊 JaCoCo Code Coverage"
