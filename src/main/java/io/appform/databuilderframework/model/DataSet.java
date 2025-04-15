@@ -75,14 +75,7 @@ public class DataSet {
         if (null == requiredKeys || requiredKeys.isEmpty()) {
             return false;
         }
-        return safeOpOptimistic(() -> {
-            for (String data : requiredKeys) {
-                if (!availableData.containsKey(data)) {
-                    return false;
-                }
-            }
-            return true;
-        });
+        return safeOp(() -> availableData.keySet().containsAll(requiredKeys));
     }
 
     public void copyInto(final Map<String, Data> outMap, Collection<String> excludedKeys) {
@@ -110,26 +103,12 @@ public class DataSet {
     }
 
     private <T> T safeOp(Supplier<T> operation) {
-//        val stamp = lock.readLock();
+        val stamp = lock.readLock();
         try {
             return operation.get();
         }
         finally {
-//            lock.unlockRead(stamp);
-        }
-    }
-
-    private <T> T safeOpOptimistic(Supplier<T> operation) {
-        val stamp = lock.tryOptimisticRead();
-        // This means a writeLock is already present, fallback to full readLock()
-        if (stamp == 0) {
-            return safeOp(operation);
-        }
-        T output = operation.get();
-        if (!lock.validate(stamp)) {
-            return safeOp(operation);
-        } else {
-            return output;
+            lock.unlockRead(stamp);
         }
     }
 }
