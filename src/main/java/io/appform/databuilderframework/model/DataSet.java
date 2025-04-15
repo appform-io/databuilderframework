@@ -45,7 +45,8 @@ public class DataSet {
         try {
             this.availableData.put(dataName, data);
             return this;
-        } finally {
+        }
+        finally {
             lock.unlockWrite(stamp);
         }
     }
@@ -55,7 +56,8 @@ public class DataSet {
         try {
             data.forEach(d -> availableData.put(d.getData(), d));
             return this;
-        } finally {
+        }
+        finally {
             lock.unlockWrite(stamp);
         }
     }
@@ -68,7 +70,7 @@ public class DataSet {
         if (Strings.isNullOrEmpty(name)) {
             return null;
         }
-        return availableData.get(name);
+        return safeOp(() -> availableData.get(name));
     }
 
     public boolean containsAll(final Collection<String> requiredKeys) {
