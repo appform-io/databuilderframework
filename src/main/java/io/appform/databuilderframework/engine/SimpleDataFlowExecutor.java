@@ -93,7 +93,7 @@ public class SimpleDataFlowExecutor extends DataFlowExecutor {
                                 newlyGeneratedData.add(response.getData());
                             }
                         }
-                        log.trace("Ran " + builderMeta.getName());
+                        log.trace("Ran {}", builderMeta.getName());
                         processedBuilders.add(builderMeta);
                         for (DataBuilderExecutionListener listener : dataBuilderExecutionListener) {
                             try {
