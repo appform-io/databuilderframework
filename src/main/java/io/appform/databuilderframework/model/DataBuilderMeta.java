@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import lombok.Builder;
-import lombok.Getter;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
@@ -66,22 +65,18 @@ public class DataBuilderMeta implements Comparable<DataBuilderMeta>, Serializabl
     @JsonProperty
     private Set<String> access;
 
-    @Getter
-    private Set<String> accessibleDataSet;
-
     public DataBuilderMeta(Set<String> consumes, String produces, String name) {
         this(consumes, produces, name, Collections.emptySet(), Collections.emptySet());
     }
 
     @Builder
     public DataBuilderMeta(Set<String> consumes, String produces, String name,
-    		Set<String> optionals, Set<String> access) {
+                           Set<String> optionals, Set<String> access) {
         this.consumes = consumes;
         this.produces = produces;
         this.name = name;
         this.optionals = optionals;
         this.access = access;
-        this.accessibleDataSet = constructAccessibleDataSet();
     }
 
 
@@ -90,23 +85,23 @@ public class DataBuilderMeta implements Comparable<DataBuilderMeta>, Serializabl
 
     @JsonIgnore
     public Set<String> getEffectiveConsumes(){
-    	if(optionals != null && !optionals.isEmpty()){
-    		return Sets.union(optionals, consumes);
-    	}else{
-    		return consumes;
-    	}
+        if(optionals != null && !optionals.isEmpty()){
+            return Sets.union(optionals, consumes);
+        }else{
+            return consumes;
+        }
     }
 
     @JsonIgnore
-    private Set<String> constructAccessibleDataSet() {
-    	Set<String> output = consumes;
-    	if(optionals != null && !optionals.isEmpty()){
-    		output = Sets.union(optionals, output);
-    	}
-    	if(access != null && !access.isEmpty()){
-    		output = Sets.union(access, output);
-    	}
-    	return output;
+    public Set<String> getAccessibleDataSet(){
+        Set<String> output = consumes;
+        if(optionals != null && !optionals.isEmpty()){
+            output = Sets.union(optionals, output);
+        }
+        if(access != null && !access.isEmpty()){
+            output = Sets.union(access, output);
+        }
+        return output;
     }
 
     public int compareTo(DataBuilderMeta rhs) {
@@ -114,8 +109,8 @@ public class DataBuilderMeta implements Comparable<DataBuilderMeta>, Serializabl
     }
 
     public DataBuilderMeta deepCopy() {
-    	Set<String> optionalCopy = (optionals != null) ? ImmutableSet.copyOf(optionals) : null;
-    	Set<String> accessCopy = (access != null) ? ImmutableSet.copyOf(access) : null;
+        Set<String> optionalCopy = (optionals != null) ? ImmutableSet.copyOf(optionals) : null;
+        Set<String> accessCopy = (access != null) ? ImmutableSet.copyOf(access) : null;
         return new DataBuilderMeta(ImmutableSet.copyOf(consumes), produces, name, optionalCopy, accessCopy);
     }
 }
