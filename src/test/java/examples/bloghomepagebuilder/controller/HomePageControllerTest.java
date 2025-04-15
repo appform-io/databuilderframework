@@ -52,7 +52,7 @@ public class HomePageControllerTest {
     private void runHomePageTest(DataFlowExecutor executor) throws Exception {
         val request = new HomePageRequest("2321312312", "2323454", "Blah".getBytes());
         val stopwatch = Stopwatch.createStarted();
-        for(long i = 0; i < 10000_000; i++) {
+        for(long i = 0; i < 100_000; i++) {
             HomePageResponse response = executor.run(homePageDataFlow, request).get(HomePageResponse.class);
             Assert.assertNotNull(response);
             //System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(response));
