@@ -40,7 +40,7 @@ public class SimpleDataFlowExecutor extends DataFlowExecutor {
         val executionGraph = dataFlow.getExecutionGraph();
         val dataSet = dataFlowInstance.getDataSet().accessor().copy(); //Create own copy to work with
         val dataSetAccessor = dataSet.accessor();
-        val responseData = new LinkedHashMap<String, Data>();
+        val responseData = new TreeMap<String, Data>();
         val activeDataSet = new HashSet<String>();
         val dependencyHierarchy = executionGraph.getDependencyHierarchy();
         val newlyGeneratedData = new HashSet<String>();
