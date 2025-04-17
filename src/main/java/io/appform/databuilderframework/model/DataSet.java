@@ -52,6 +52,13 @@ public class DataSet {
         });
     }
 
+    public DataSet remove(Class<?> dataClass) {
+        return safeWriteOp(() -> {
+            availableData.remove(Utils.name(dataClass));
+            return DataSet.this;
+        });
+    }
+
     public DataSet add(final Collection<Data> data) {
         return safeWriteOp(() -> {
             data.forEach(d -> availableData.put(d.getData(), d));
