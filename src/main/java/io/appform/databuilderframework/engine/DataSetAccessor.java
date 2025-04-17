@@ -37,8 +37,8 @@ public class DataSetAccessor {
     public <T extends Data> T get(String key, Class<T> tClass) {
         val data = dataSet.get(key);
         return null == data
-               ? null
-               : tClass.cast(data);
+                ? null
+                : tClass.cast(data);
     }
 
     /**
@@ -53,9 +53,9 @@ public class DataSetAccessor {
      */
     public <B extends DataBuilder, T extends Data> T getAccessibleData(String key, B builder, Class<T> tClass) {
         Preconditions.checkArgument(!builder.getDataBuilderMeta().getAccessibleDataSet().contains(key),
-                                    "Builder %s can access only %s",
-                                                  builder.getDataBuilderMeta().getName(),
-                                                  builder.getDataBuilderMeta().getConsumes());
+                "Builder %s can access only %s",
+                builder.getDataBuilderMeta().getName(),
+                builder.getDataBuilderMeta().getConsumes());
         return get(key, tClass);
     }
 
@@ -118,6 +118,10 @@ public class DataSetAccessor {
      */
     public boolean checkForData(Class<?> clazz) {
         return checkForData(Utils.name(clazz));
+    }
+
+    public Set<String> keySet() {
+        return dataSet.keySet();
     }
 
     /**

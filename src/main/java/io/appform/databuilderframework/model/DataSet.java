@@ -49,6 +49,17 @@ public class DataSet {
         }
     }
 
+    public DataSet remove(String dataName) {
+        val stamp = lock.writeLock();
+        try {
+            this.availableData.remove(dataName);
+            return this;
+        }
+        finally {
+            lock.unlockWrite(stamp);
+        }
+    }
+
     public DataSet add(final Collection<Data> data) {
         val stamp = lock.writeLock();
         try {
@@ -117,5 +128,9 @@ public class DataSet {
         finally {
             lock.unlockRead(stamp);
         }
+    }
+
+    public Set<String> keySet() {
+        return availableData.keySet();
     }
 }
