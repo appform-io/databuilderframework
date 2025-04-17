@@ -39,36 +39,24 @@ public class DataSet {
     }
 
     public DataSet add(String dataName, Data data) {
-        val stamp = lock.writeLock();
-        try {
-            this.availableData.put(dataName, data);
-            return this;
-        }
-        finally {
-            lock.unlockWrite(stamp);
-        }
+        return safeWriteOp(() -> {
+            availableData.put(dataName, data);
+            return DataSet.this;
+        });
     }
 
     public DataSet remove(String dataName) {
-        val stamp = lock.writeLock();
-        try {
-            this.availableData.remove(dataName);
-            return this;
-        }
-        finally {
-            lock.unlockWrite(stamp);
-        }
+        return safeWriteOp(() -> {
+            availableData.remove(dataName);
+            return DataSet.this;
+        });
     }
 
     public DataSet add(final Collection<Data> data) {
-        val stamp = lock.writeLock();
-        try {
+        return safeWriteOp(() -> {
             data.forEach(d -> availableData.put(d.getData(), d));
-            return this;
-        }
-        finally {
-            lock.unlockWrite(stamp);
-        }
+            return DataSet.this;
+        });
     }
 
     public <T extends Data> DataSet add(T data) {
@@ -127,6 +115,16 @@ public class DataSet {
         }
         finally {
             lock.unlockRead(stamp);
+        }
+    }
+
+    private <T> T safeWriteOp(Supplier<T> operation) {
+        val stamp = lock.writeLock();
+        try {
+            return operation.get();
+        }
+        finally {
+            lock.unlockWrite(stamp);
         }
     }
 
