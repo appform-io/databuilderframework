@@ -6,6 +6,8 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import io.appform.databuilderframework.engine.DataSetAccessor;
 import io.appform.databuilderframework.engine.Utils;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.val;
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -26,7 +28,9 @@ public class DataSet {
     @NotNull
     @NotEmpty
     @JsonProperty
-    private final Map<String, Data> availableData;
+    @Getter
+    @Setter
+    private Map<String, Data> availableData;
 
     private final StampedLock lock = new StampedLock();
 

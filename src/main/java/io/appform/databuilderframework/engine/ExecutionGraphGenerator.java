@@ -133,11 +133,13 @@ public class ExecutionGraphGenerator {
         }
 
         val childNode = currentNode + 1;
-        return root.getIncoming()
+        val ret = root.getIncoming()
                 .stream()
                 .mapToInt(child -> Math.max(rankNodes(child, childNode, processedNodes), childNode))
                 .max()
                 .orElse(childNode);
+        processedNodes.add(data);
+        return ret;
     }
 
     private DependencyNode generateDependencyTree(
