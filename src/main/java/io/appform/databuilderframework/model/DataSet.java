@@ -28,9 +28,7 @@ public class DataSet {
     @NotNull
     @NotEmpty
     @JsonProperty
-    @Getter
-    @Setter
-    private Map<String, Data> availableData;
+    private final Map<String, Data> availableData;
 
     private final StampedLock lock = new StampedLock();
 
@@ -45,20 +43,6 @@ public class DataSet {
     public DataSet add(String dataName, Data data) {
         return safeWriteOp(() -> {
             availableData.put(dataName, data);
-            return DataSet.this;
-        });
-    }
-
-    public DataSet remove(String dataName) {
-        return safeWriteOp(() -> {
-            availableData.remove(dataName);
-            return DataSet.this;
-        });
-    }
-
-    public DataSet remove(Class<?> dataClass) {
-        return safeWriteOp(() -> {
-            availableData.remove(Utils.name(dataClass));
             return DataSet.this;
         });
     }
@@ -137,9 +121,5 @@ public class DataSet {
         finally {
             lock.unlockWrite(stamp);
         }
-    }
-
-    public Set<String> keySet() {
-        return availableData.keySet();
     }
 }
