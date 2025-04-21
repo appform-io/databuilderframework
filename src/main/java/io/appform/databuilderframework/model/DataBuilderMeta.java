@@ -45,8 +45,8 @@ public class DataBuilderMeta implements Comparable<DataBuilderMeta>, Serializabl
     private String name;
 
     private int rank;
-    
-    
+
+
     /**
      * Set of {@link io.appform.databuilderframework.model.Data} this {@link io.appform.databuilderframework.engine.DataBuilder}
      * can consume optionally, i.e. this {@link io.appform.databuilderframework.model.Data}
@@ -70,7 +70,7 @@ public class DataBuilderMeta implements Comparable<DataBuilderMeta>, Serializabl
     }
 
     @Builder
-    public DataBuilderMeta(Set<String> consumes, String produces, String name, 
+    public DataBuilderMeta(Set<String> consumes, String produces, String name,
     		Set<String> optionals, Set<String> access) {
         this.consumes = consumes;
         this.produces = produces;
@@ -79,7 +79,7 @@ public class DataBuilderMeta implements Comparable<DataBuilderMeta>, Serializabl
         this.access = access;
     }
 
-    
+
     public DataBuilderMeta() {
     }
 
@@ -91,7 +91,7 @@ public class DataBuilderMeta implements Comparable<DataBuilderMeta>, Serializabl
     		return consumes;
     	}
     }
-    
+
     @JsonIgnore
     public Set<String> getAccessibleDataSet(){
     	Set<String> output = consumes;
@@ -103,7 +103,7 @@ public class DataBuilderMeta implements Comparable<DataBuilderMeta>, Serializabl
     	}
     	return output;
     }
-    
+
     public int compareTo(DataBuilderMeta rhs) {
         return name.compareTo(rhs.getName());
     }

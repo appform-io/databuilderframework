@@ -12,7 +12,9 @@ import lombok.val;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.StampedLock;
 import java.util.function.Supplier;
@@ -56,13 +58,6 @@ public class DataSet {
 
     public <T extends Data> DataSet add(T data) {
         return add(Utils.name(data.getClass()), data);
-    }
-
-    public Map<String, Data> filter(final Collection<String> requiredKeys) {
-        if (null == requiredKeys || requiredKeys.isEmpty()) {
-            return Collections.emptyMap();
-        }
-        return safeOp(() -> Maps.filterKeys(Utils.sanitize(availableData), Predicates.in(requiredKeys)));
     }
 
     public Data get(final String name) {

@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import io.appform.databuilderframework.model.Data;
 import io.appform.databuilderframework.model.DataDelta;
 import io.appform.databuilderframework.model.DataSet;
+import io.appform.databuilderframework.model.DataSetView;
 import lombok.val;
 
 import java.util.Collections;
@@ -66,7 +67,7 @@ public class DataSetAccessor {
      * @return
      */
     public DataSet getAccesibleDataSetFor(DataBuilder builder) {
-        return new DataSet(dataSet.filter(builder.getDataBuilderMeta().getAccessibleDataSet()));
+        return new DataSetView(dataSet, builder.getDataBuilderMeta().getAccessibleDataSet());
     }
 
     /**
