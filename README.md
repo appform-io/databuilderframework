@@ -1,5 +1,4 @@
-# Data Builder Framework[![Travis build status](https://travis-ci.org/appform-io/databuilderframework.svg?branch=master)](https://travis-ci.org/appform-io/databuilderframework)
-
+# Data Builder Framework [![SonarQube](https://github.com/appform-io/databuilderframework/actions/workflows/build.yml/badge.svg)](https://github.com/appform-io/databuilderframework/actions/workflows/build.yml)
 DataBuilder framework is a high level logic execution engine that can be used to execute multi-step workflows. This engine currently powers the checkout system as well as diagnostics and other workflows at flipkart. You should look at this framework for the following scenarios:
 - Multi-step work flow executions where each step is dependent on data generated from previous steps
 - Executions can span one request scope or multiple
