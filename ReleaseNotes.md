@@ -1,6 +1,10 @@
 # Release Notes
 -------------
 
+## 1.1.1
+* Performance improvements
+* Bug fix to eliminate loop
+
 ## 1.1.0
 * Major code cleanup, using lombok
 * Thread safety improvement in DataSet
