@@ -6,6 +6,8 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import io.appform.databuilderframework.engine.DataSetAccessor;
 import io.appform.databuilderframework.engine.Utils;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.val;
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -39,25 +41,17 @@ public class DataSet {
     }
 
     public DataSet add(String dataName, Data data) {
-        val stamp = lock.writeLock();
-        try {
-            this.availableData.put(dataName, data);
-            return this;
-        }
-        finally {
-            lock.unlockWrite(stamp);
-        }
+        return safeWriteOp(() -> {
+            availableData.put(dataName, data);
+            return DataSet.this;
+        });
     }
 
     public DataSet add(final Collection<Data> data) {
-        val stamp = lock.writeLock();
-        try {
+        return safeWriteOp(() -> {
             data.forEach(d -> availableData.put(d.getData(), d));
-            return this;
-        }
-        finally {
-            lock.unlockWrite(stamp);
-        }
+            return DataSet.this;
+        });
     }
 
     public <T extends Data> DataSet add(T data) {
@@ -116,6 +110,16 @@ public class DataSet {
         }
         finally {
             lock.unlockRead(stamp);
+        }
+    }
+
+    private <T> T safeWriteOp(Supplier<T> operation) {
+        val stamp = lock.writeLock();
+        try {
+            return operation.get();
+        }
+        finally {
+            lock.unlockWrite(stamp);
         }
     }
 }

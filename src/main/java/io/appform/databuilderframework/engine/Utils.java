@@ -10,6 +10,7 @@ import io.appform.databuilderframework.model.Data;
 import io.appform.databuilderframework.model.DataBuilderMeta;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
+import java.util.concurrent.ConcurrentHashMap;
 
 import java.util.*;
 
@@ -20,12 +21,15 @@ import java.util.*;
 @Slf4j
 public final class Utils {
 
+    private static final Map<Class<?>, String> CLASS_TO_NAME_MAPPING = new ConcurrentHashMap<>();
+
     public static String name(Object object) {
         return name(object.getClass());
     }
 
     public static String name(Class<?> clazz) {
-        return CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, clazz.getSimpleName());
+        return CLASS_TO_NAME_MAPPING.computeIfAbsent(clazz,
+                aClass -> CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, clazz.getSimpleName()));
     }
 
     public static<T> boolean isEmpty(Collection<T> collection) {

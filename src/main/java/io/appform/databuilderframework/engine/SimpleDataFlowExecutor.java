@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.Supplier;
 
 /**
  * The executor for a {@link io.appform.databuilderframework.model.DataFlow}.
@@ -42,7 +43,7 @@ public class SimpleDataFlowExecutor extends DataFlowExecutor {
         val activeDataSet = new HashSet<String>();
         val dependencyHierarchy = executionGraph.getDependencyHierarchy();
         val newlyGeneratedData = new HashSet<String>();
-        val processedBuilders = Collections.synchronizedSet(new HashSet<DataBuilderMeta>());
+        val processedBuilders = new HashSet<DataBuilderMeta>();
 
         dataSetAccessor.merge(dataDelta);
         dataDelta.getDelta().forEach(data -> activeDataSet.add(data.getData()));
@@ -80,10 +81,9 @@ public class SimpleDataFlowExecutor extends DataFlowExecutor {
                                         dataSet.accessor().getAccesibleDataSetFor(builder)));
                         if (null != response) {
                             Preconditions.checkArgument(response.getData().equalsIgnoreCase(builderMeta.getProduces()),
-                                                        String.format(
-                                                                "Builder is supposed to produce %s but produces %s",
-                                                                builderMeta.getProduces(),
-                                                                response.getData()));
+                                            "Builder is supposed to produce %s but produces %s",
+                                            builderMeta.getProduces(),
+                                            response.getData());
                             dataSetAccessor.merge(response);
                             responseData.put(response.getData(), response);
                             response.setGeneratedBy(builderMeta.getName());
@@ -93,7 +93,7 @@ public class SimpleDataFlowExecutor extends DataFlowExecutor {
                                 newlyGeneratedData.add(response.getData());
                             }
                         }
-                        log.trace("Ran " + builderMeta.getName());
+                        log.trace("Ran {}", builderMeta.getName());
                         processedBuilders.add(builderMeta);
                         for (DataBuilderExecutionListener listener : dataBuilderExecutionListener) {
                             try {
