@@ -42,7 +42,7 @@ public class SimpleDataFlowExecutor extends DataFlowExecutor {
         val activeDataSet = new HashSet<String>();
         val dependencyHierarchy = executionGraph.getDependencyHierarchy();
         val newlyGeneratedData = new HashSet<String>();
-        val processedBuilders = Collections.synchronizedSet(new HashSet<DataBuilderMeta>());
+        val processedBuilders = new HashSet<DataBuilderMeta>();
 
         dataSetAccessor.merge(dataDelta);
         dataDelta.getDelta().forEach(data -> activeDataSet.add(data.getData()));

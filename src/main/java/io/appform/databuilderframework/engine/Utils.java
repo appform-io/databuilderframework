@@ -21,7 +21,7 @@ import java.util.*;
 @Slf4j
 public final class Utils {
 
-    private static final ConcurrentHashMap<Class<?>, String> CLASS_TO_NAME_MAPPING = new ConcurrentHashMap<>();
+    private static final Map<Class<?>, String> CLASS_TO_NAME_MAPPING = new ConcurrentHashMap<>();
 
     public static String name(Object object) {
         return name(object.getClass());

@@ -41,23 +41,17 @@ public class DataSet {
     }
 
     public DataSet add(String dataName, Data data) {
-        val stamp = lock.writeLock();
-        try {
-            this.availableData.put(dataName, data);
-            return this;
-        } finally {
-            lock.unlockWrite(stamp);
-        }
+        return safeWriteOp(() -> {
+            availableData.put(dataName, data);
+            return DataSet.this;
+        });
     }
 
     public DataSet add(final Collection<Data> data) {
-        val stamp = lock.writeLock();
-        try {
+        return safeWriteOp(() -> {
             data.forEach(d -> availableData.put(d.getData(), d));
-            return this;
-        } finally {
-            lock.unlockWrite(stamp);
-        }
+            return DataSet.this;
+        });
     }
 
     public <T extends Data> DataSet add(T data) {
@@ -68,7 +62,7 @@ public class DataSet {
         if (null == requiredKeys || requiredKeys.isEmpty()) {
             return Collections.emptyMap();
         }
-        return safeOpOptimistic(() -> Maps.filterKeys(Utils.sanitize(availableData), Predicates.in(requiredKeys)));
+        return safeOp(() -> Maps.filterKeys(Utils.sanitize(availableData), Predicates.in(requiredKeys)));
     }
 
     public Data get(final String name) {
@@ -82,7 +76,7 @@ public class DataSet {
         if (null == requiredKeys || requiredKeys.isEmpty()) {
             return false;
         }
-        return safeOpOptimistic(() -> {
+        return safeOp(() -> {
             for (String data : requiredKeys) {
                 if (!availableData.containsKey(data)) {
                     return false;
@@ -126,17 +120,13 @@ public class DataSet {
         }
     }
 
-    private <T> T safeOpOptimistic(Supplier<T> operation) {
-        val stamp = lock.tryOptimisticRead();
-        // This means a writeLock is already present, fallback to full readLock()
-        if (stamp == 0) {
-            return safeOp(operation);
+    private <T> T safeWriteOp(Supplier<T> operation) {
+        val stamp = lock.writeLock();
+        try {
+            return operation.get();
         }
-        T output = operation.get();
-        if (!lock.validate(stamp)) {
-            return safeOp(operation);
-        } else {
-            return output;
+        finally {
+            lock.unlockWrite(stamp);
         }
     }
 }
