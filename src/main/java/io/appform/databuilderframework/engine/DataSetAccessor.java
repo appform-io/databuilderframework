@@ -120,6 +120,10 @@ public class DataSetAccessor {
         return checkForData(Utils.name(clazz));
     }
 
+    public Set<String> keySet() {
+        return dataSet.keySet();
+    }
+
     /**
      * Get a copy of the underlying data set.
      */

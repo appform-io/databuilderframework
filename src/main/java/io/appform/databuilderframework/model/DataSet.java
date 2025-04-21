@@ -28,6 +28,8 @@ public class DataSet {
     @NotNull
     @NotEmpty
     @JsonProperty
+    @Getter
+    @Setter
     private final Map<String, Data> availableData;
 
     private final StampedLock lock = new StampedLock();
@@ -57,6 +59,21 @@ public class DataSet {
     public <T extends Data> DataSet add(T data) {
         return add(Utils.name(data.getClass()), data);
     }
+
+    public DataSet remove(final String dataName) {
+        return safeWriteOp(() -> {
+            availableData.remove(dataName);
+            return DataSet.this;
+        });
+    }
+
+    public DataSet remove(final Class<?> dataClass) {
+        return safeWriteOp(() -> {
+            availableData.remove(Utils.name(dataClass));
+            return DataSet.this;
+        });
+    }
+
 
     public Map<String, Data> filter(final Collection<String> requiredKeys) {
         if (null == requiredKeys || requiredKeys.isEmpty()) {
@@ -101,6 +118,10 @@ public class DataSet {
 
     public DataSetAccessor accessor() {
         return accessor(this);
+    }
+
+    public Set<String> keySet() {
+        return availableData.keySet();
     }
 
     private <T> T safeOp(Supplier<T> operation) {
