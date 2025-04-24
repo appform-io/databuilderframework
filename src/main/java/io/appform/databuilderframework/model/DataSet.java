@@ -119,7 +119,7 @@ public class DataSet {
     }
 
     public Set<String> keySet() {
-        return Set.copyOf(availableData.keySet());
+        return safeOp(() -> Set.copyOf(availableData.keySet()));
     }
 
     private <T> T safeOp(Supplier<T> operation) {
