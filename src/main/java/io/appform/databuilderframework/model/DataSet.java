@@ -28,8 +28,6 @@ public class DataSet {
     @NotNull
     @NotEmpty
     @JsonProperty
-    @Getter
-    @Setter
     private final Map<String, Data> availableData;
 
     private final StampedLock lock = new StampedLock();
@@ -121,7 +119,7 @@ public class DataSet {
     }
 
     public Set<String> keySet() {
-        return availableData.keySet();
+        return Set.copyOf(availableData.keySet());
     }
 
     private <T> T safeOp(Supplier<T> operation) {
