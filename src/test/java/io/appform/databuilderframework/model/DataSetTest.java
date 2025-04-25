@@ -30,5 +30,14 @@ public class DataSetTest extends TestCase {
         assertNull(ds.get(Utils.name(TestData.class)));
     }
 
+    @Test
+    public void testKeyRemovalFromDataSetWithClassAsParameter() {
+        DataSet ds = new DataSet();
+        ds.add(new TestData());
+        assertNotNull(ds.get(Utils.name(TestData.class)));
+        Data removedData = ds.remove(TestData.class);
+        assertNotNull(removedData);
+        assertNull(ds.get(Utils.name(TestData.class)));
+    }
 
 }
