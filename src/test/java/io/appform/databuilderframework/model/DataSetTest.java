@@ -4,6 +4,8 @@ import io.appform.databuilderframework.engine.Utils;
 import junit.framework.TestCase;
 import org.junit.Test;
 
+import java.util.Set;
+
 public class DataSetTest extends TestCase {
 
     public class TestData extends Data {
@@ -38,6 +40,15 @@ public class DataSetTest extends TestCase {
         Data removedData = ds.remove(TestData.class);
         assertNotNull(removedData);
         assertNull(ds.get(Utils.name(TestData.class)));
+    }
+
+    @Test
+    public void testKeySetFetch() {
+        DataSet ds = new DataSet();
+        ds.add(new TestData());
+        Set<String> dataKeys = ds.keySet();
+        assertNotNull(dataKeys);
+        assertEquals(1, dataKeys.size());
     }
 
 }
