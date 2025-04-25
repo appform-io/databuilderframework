@@ -58,20 +58,13 @@ public class DataSet {
         return add(Utils.name(data.getClass()), data);
     }
 
-    public DataSet remove(final String dataName) {
-        return safeWriteOp(() -> {
-            availableData.remove(dataName);
-            return DataSet.this;
-        });
+    public Data remove(final String dataName) {
+        return safeWriteOp(() -> availableData.remove(dataName));
     }
 
-    public DataSet remove(final Class<?> dataClass) {
-        return safeWriteOp(() -> {
-            availableData.remove(Utils.name(dataClass));
-            return DataSet.this;
-        });
+    public Data remove(final Class<?> dataClass) {
+        return safeWriteOp(() -> availableData.remove(Utils.name(dataClass)));
     }
-
 
     public Map<String, Data> filter(final Collection<String> requiredKeys) {
         if (null == requiredKeys || requiredKeys.isEmpty()) {
@@ -119,7 +112,7 @@ public class DataSet {
     }
 
     public Set<String> keySet() {
-        return safeOp(() -> Set.copyOf(availableData.keySet()));
+        return safeOp(() -> new HashSet<>(availableData.keySet()));
     }
 
     private <T> T safeOp(Supplier<T> operation) {
