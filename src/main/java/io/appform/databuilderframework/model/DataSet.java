@@ -3,6 +3,7 @@ package io.appform.databuilderframework.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Predicates;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import io.appform.databuilderframework.engine.DataSetAccessor;
 import io.appform.databuilderframework.engine.Utils;
@@ -58,6 +59,14 @@ public class DataSet {
         return add(Utils.name(data.getClass()), data);
     }
 
+    public Data remove(final String dataName) {
+        return safeWriteOp(() -> availableData.remove(dataName));
+    }
+
+    public Data remove(final Class<?> dataClass) {
+        return safeWriteOp(() -> availableData.remove(Utils.name(dataClass)));
+    }
+
     public Map<String, Data> filter(final Collection<String> requiredKeys) {
         if (null == requiredKeys || requiredKeys.isEmpty()) {
             return Collections.emptyMap();
@@ -101,6 +110,10 @@ public class DataSet {
 
     public DataSetAccessor accessor() {
         return accessor(this);
+    }
+
+    public Set<String> keySet() {
+        return safeOp(() -> ImmutableSet.copyOf(availableData.keySet()));
     }
 
     private <T> T safeOp(Supplier<T> operation) {
