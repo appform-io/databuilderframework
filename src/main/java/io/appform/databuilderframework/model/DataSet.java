@@ -3,6 +3,7 @@ package io.appform.databuilderframework.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Predicates;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import io.appform.databuilderframework.engine.DataSetAccessor;
 import io.appform.databuilderframework.engine.Utils;
@@ -112,7 +113,7 @@ public class DataSet {
     }
 
     public Set<String> keySet() {
-        return safeOp(() -> new HashSet<>(availableData.keySet()));
+        return safeOp(() -> ImmutableSet.copyOf(availableData.keySet()));
     }
 
     private <T> T safeOp(Supplier<T> operation) {
